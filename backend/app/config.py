@@ -11,6 +11,7 @@ DEFAULT_ALLOWED_ORIGINS = (
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 )
+DEFAULT_CACHE_ROOT = PROJECT_ROOT / "data" / "cache"
 
 
 @dataclass(frozen=True)
@@ -48,3 +49,10 @@ def get_allowed_origins() -> list[str]:
 
     origins = [origin.strip().rstrip("/") for origin in configured.split(",")]
     return [origin for origin in origins if origin.startswith(("http://", "https://"))]
+
+
+def get_cache_root() -> Path:
+    """Return the writable runtime cache root without requiring persistent storage."""
+    file_values = dict(dotenv_values(ROOT_ENV_FILE))
+    configured = _configured_value("COOLCITY_CACHE_ROOT", file_values)
+    return Path(configured).expanduser() if configured else DEFAULT_CACHE_ROOT

@@ -1,8 +1,8 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-
 import { NextResponse } from "next/server";
 
+import carbonResource from "../../../../../data/research/urban_tree_carbon_evidence.json";
+import evidenceResource from "../../../../../data/research/us_cooling_evidence.json";
+import catalogResource from "../../../../../data/species/phoenix_tree_catalog.json";
 import type { CarbonEvidence, CoolingEvidence } from "../../../../lib/cooling-response-model";
 import { evaluateCoolingResponse } from "../../../../lib/cooling-response-model";
 import { optimizePolicyPortfolio } from "../../../../lib/policy-optimizer";
@@ -11,23 +11,17 @@ import { parseSpeciesCatalog } from "../../../../lib/species-core";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-async function resources() {
-  const dataRoot = path.resolve(process.cwd(), "..", "data");
-  const [catalogText, evidenceText, carbonText] = await Promise.all([
-    readFile(path.join(dataRoot, "species", "phoenix_tree_catalog.json"), "utf8"),
-    readFile(path.join(dataRoot, "research", "us_cooling_evidence.json"), "utf8"),
-    readFile(path.join(dataRoot, "research", "urban_tree_carbon_evidence.json"), "utf8"),
-  ]);
+function resources() {
   return {
-    catalog: parseSpeciesCatalog(JSON.parse(catalogText)),
-    evidence: JSON.parse(evidenceText) as CoolingEvidence,
-    carbon: JSON.parse(carbonText) as CarbonEvidence,
+    catalog: parseSpeciesCatalog(catalogResource),
+    evidence: evidenceResource as CoolingEvidence,
+    carbon: carbonResource as CarbonEvidence,
   };
 }
 
 export async function GET() {
   try {
-    const { catalog, evidence, carbon } = await resources();
+    const { catalog, evidence, carbon } = resources();
     return NextResponse.json({ catalog, cooling_evidence: evidence, carbon_evidence: carbon });
   } catch {
     return NextResponse.json({ detail: "Policy-model resources could not be loaded." }, { status: 500 });
@@ -37,7 +31,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const payload = await request.json() as Record<string, unknown>;
-    const { catalog, evidence, carbon } = await resources();
+    const { catalog, evidence, carbon } = resources();
     const species = catalog.species.find((candidate) => candidate.id === payload.species_id);
     if (!species) return NextResponse.json({ detail: "Select a supported Phoenix tree species." }, { status: 400 });
     if (!payload.selected_cell || !payload.all_cells || typeof payload.target_temperature_c !== "number") {

@@ -210,24 +210,70 @@ npm.cmd run build
 
 ## Deployment
 
-CoolCity is a two-service application. Deploy the Python backend and Next.js frontend separately, or use the included Docker files.
+CoolCity is a two-service application: FastAPI runs on Render and Next.js runs on Vercel. The checked-in [`render.yaml`](render.yaml) and [`frontend/vercel.json`](frontend/vercel.json) keep the build and start commands reproducible. Neither deployment configuration contains a FortyGuard key.
+
+### 1. Deploy FastAPI on Render
+
+1. Sign in to [Render](https://dashboard.render.com/) with the GitHub account that can read this repository.
+2. Choose **New → Blueprint**, select `shayan19/coolcity-ai`, keep the Blueprint path as `render.yaml`, and continue.
+3. When Render asks for `COOLCITY_ALLOWED_ORIGINS`, temporarily enter `https://example.invalid`. This is replaced with the real Vercel origin in step 3 below.
+4. Apply the Blueprint and wait for `coolcity-ai-backend` to report **Live**.
+5. Copy the assigned HTTPS URL, for example `https://coolcity-ai-backend.onrender.com`, and open `<backend-url>/health`. A healthy deployment returns `{"status":"ok", ...}`.
+
+The cost-safe Blueprint default is Render's `free` plan. Render documents that free web services spin down after 15 minutes without inbound traffic and can take about one minute to wake, so it is suitable for staging but not a reliable judging window. Before the submission deadline, change the backend to Render's smallest always-on web-service plan (`0.5c-512mb` at the time this README was prepared), after reviewing the current price in the dashboard. No database or persistent disk is required. The cache uses `/tmp/coolcity-cache`; losing cached provider results after a restart affects performance only, not correctness.
+
+Do **not** add `FORTYGUARD_API_KEY` to Render for the public bring-your-own-key demo. It remains an optional operator-only fallback. If it is ever added, it belongs only in Render's secret environment settings, never in Vercel.
+
+### 2. Deploy Next.js on Vercel
+
+1. In [Vercel](https://vercel.com/new), import `shayan19/coolcity-ai` from GitHub.
+2. Set **Root Directory** to `frontend`. Keep **Include source files outside of the Root Directory in the Build Step** enabled; the server-side policy route bundles the reviewed evidence JSON from `data/`.
+3. Vercel should detect **Next.js**. The repository configuration runs exact `npm ci` and `npm run build`; do not set an Output Directory.
+4. Add `NEXT_PUBLIC_BACKEND_URL` for **Production, Preview, and Development**, using the Render HTTPS URL with no trailing slash. This value is a public service address, not a credential.
+5. Deploy, wait for all checks to pass, and copy the stable production URL shown under **Domains**. Do not use a commit-specific preview URL for the hackathon form.
+
+Vercel environment-variable changes apply only to new deployments. If the backend URL is changed later, redeploy the frontend so the new public value is included in its build.
+
+### 3. Lock CORS to the production frontend
+
+1. In Render, open `coolcity-ai-backend` → **Environment**.
+2. Replace `COOLCITY_ALLOWED_ORIGINS` with the exact Vercel production origin, for example `https://coolcity-ai.vercel.app`. Include no path and no trailing slash. Multiple intentional production domains can be comma-separated.
+3. Save and deploy the backend. CoolCity allows only `GET`/`POST` requests and the explicit `X-FortyGuard-API-Key` browser header; wildcard origins are rejected by the application configuration.
+
+### 4. End-to-end release verification
+
+Run these checks after both deployments finish:
+
+```powershell
+$backendUrl = "https://coolcity-ai-backend.onrender.com"
+$frontendUrl = "https://coolcity-ai.vercel.app"
+
+Invoke-RestMethod "$backendUrl/health"
+Invoke-WebRequest "$frontendUrl" -UseBasicParsing | Select-Object StatusCode
+Invoke-WebRequest "$frontendUrl/api/policy/evaluate" -UseBasicParsing | Select-Object StatusCode
+
+$headers = @{
+  Origin = $frontendUrl
+  "Access-Control-Request-Method" = "POST"
+  "Access-Control-Request-Headers" = "content-type,x-fortyguard-api-key"
+}
+Invoke-WebRequest "$backendUrl/api/temperature/submit" -Method Options -Headers $headers -UseBasicParsing |
+  Select-Object StatusCode, Headers
+```
+
+Then open the stable frontend URL in a fresh private/incognito window. Confirm that it loads without login, the policy-resource request succeeds, a Phoenix AOI can be drawn, 100/250/500 m are the only resolution choices, and the 5 km² limit is enforced. Paste an active personal FortyGuard key only into the in-app password field and run one real temperature analysis. Confirm the browser Network panel sends the key only in `X-FortyGuard-API-Key`, the backend returns a provider result, WorldCover loads, and policy evaluation/report generation complete. Finally, reload the page and confirm the key field is empty.
+
+The public deployment must use HTTPS. Never place `FORTYGUARD_API_KEY` in frontend environment settings, Docker build arguments, GitHub Actions logs, URLs, or any `NEXT_PUBLIC_*` variable.
+
+### Local Docker alternative
+
+Docker remains useful for a two-service local production build:
 
 ```powershell
 Copy-Item .env.example .env
 # FORTYGUARD_API_KEY may remain blank when users enter keys in the interface.
 docker compose up --build
 ```
-
-For a public deployment:
-
-1. Serve both frontend and backend over HTTPS; the backend receives the user-entered key only to make the provider call.
-2. Optionally set `FORTYGUARD_API_KEY` and `FORTYGUARD_BASE_URL` **only on the backend service** for a server-managed fallback.
-3. Set backend `COOLCITY_ALLOWED_ORIGINS` to the exact public frontend origin and allow the included `X-FortyGuard-API-Key` request header.
-4. Build the frontend with `NEXT_PUBLIC_BACKEND_URL` set to the public backend URL. This URL is public configuration, not a secret.
-5. Give `data/cache/` persistent writable storage if cross-restart caching is desired.
-6. Expose backend health at `/health` and test the frontend in a private/incognito window with no login.
-
-Never place `FORTYGUARD_API_KEY` in frontend environment settings, Docker build arguments, GitHub Actions logs, or any `NEXT_PUBLIC_*` variable.
 
 ## Limitations
 

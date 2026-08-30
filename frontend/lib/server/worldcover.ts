@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 
 import "server-only";
@@ -29,11 +30,12 @@ export const WORLDCOVER_SOURCE = "esa_worldcover_2021";
 export const WORLDCOVER_ATTRIBUTION =
   "© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium";
 
-const DEFAULT_CACHE_DIRECTORY = path.resolve(
-  process.cwd(),
-  "..",
-  "data",
-  "cache",
+const configuredCacheRoot = process.env.COOLCITY_CACHE_ROOT?.trim();
+const defaultCacheRoot = process.env.VERCEL
+  ? path.join(os.tmpdir(), "coolcity-cache")
+  : path.resolve(process.cwd(), "..", "data", "cache");
+const DEFAULT_CACHE_DIRECTORY = path.join(
+  configuredCacheRoot ? path.resolve(configuredCacheRoot) : defaultCacheRoot,
   "worldcover",
 );
 

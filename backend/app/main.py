@@ -4,7 +4,7 @@ from typing import Annotated, Any
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.app.config import get_allowed_origins, get_fortyguard_settings
+from backend.app.config import get_allowed_origins, get_cache_root, get_fortyguard_settings
 from backend.app.schemas import (
     FortyGuardSubmitRequest,
 )
@@ -42,7 +42,10 @@ def get_fortyguard_service(
             raise HTTPException(status_code=400, detail="FortyGuard API key is too long.")
         if normalized_key:
             settings = replace(settings, api_key=normalized_key)
-    return FortyGuardTemperatureService(FortyGuardClient(settings))
+    return FortyGuardTemperatureService(
+        FortyGuardClient(settings),
+        cache_directory=get_cache_root() / "fortyguard",
+    )
 
 
 def raise_safe_fortyguard_error(error: Exception) -> None:
