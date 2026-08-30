@@ -1,0 +1,11 @@
+{
+  "model_id": "coolcity_annual_tree_carbon_v1",
+  "net_carbon_kg_c_per_m2_tree_cover_year": 0.205,
+  "carbon_to_co2_mass_ratio": 3.6666666667,
+  "net_co2_kg_per_m2_tree_cover_year": 0.7516666667,
+  "source": {
+    "label": "Carbon storage and sequestration by trees in urban and community areas of the United States",
+    "url": "https://doi.org/10.1016/j.envpol.2013.03.019"
+  },
+  "disclaimer": "Annual net CO2 sequestration screening estimate based on effective mature canopy area; not avoided emissions and not a lifetime total."
+}

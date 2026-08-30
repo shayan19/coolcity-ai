@@ -1,0 +1,64 @@
+{
+  "error": false,
+  "status_code": 200,
+  "message": "Completed",
+  "data": {
+    "activity_id": "fake-test-activity-id",
+    "status": "Completed",
+    "result": {
+      "map_data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "cell_id": "fake-cell-001",
+              "average_temperature": 40.25,
+              "fixture_notice": "Synthetic test value, not a real observation"
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [-112.0805, 33.445],
+                  [-112.076, 33.445],
+                  [-112.076, 33.44825],
+                  [-112.0805, 33.44825],
+                  [-112.0805, 33.445]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "cell_id": "fake-cell-002",
+              "average_temperature": 41.75,
+              "fixture_notice": "Synthetic test value, not a real observation"
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [-112.076, 33.445],
+                  [-112.0715, 33.445],
+                  [-112.0715, 33.44825],
+                  [-112.076, 33.44825],
+                  [-112.076, 33.445]
+                ]
+              ]
+            }
+          }
+        ]
+      },
+      "stats_data": {
+        "Temperature_stats": {
+          "Minimum": 40.25,
+          "Maximum": 41.75,
+          "Mean": 41.0,
+          "Standard_deviation": 0.75
+        }
+      }
+    }
+  }
+}

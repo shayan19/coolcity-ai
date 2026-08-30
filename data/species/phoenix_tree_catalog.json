@@ -1,0 +1,202 @@
+{
+  "catalog_id": "coolcity_phoenix_trees_v1",
+  "catalog_label": "Curated Phoenix tree candidates",
+  "taxonomy_normalization": "none",
+  "source_urls": [
+    "https://www.phoenix.gov/administration/departments/waterservices/supply-conservation/save-water/how-to-save-water/shade-trees-other-plants.html",
+    "https://www.phoenix.gov/administration/departments/streets/initiatives/cool-corridors.html",
+    "https://www.amwua.org/plant-category/trees"
+  ],
+  "species": [
+    {
+      "id": "blue-palo-verde",
+      "common_name": "Blue Palo Verde",
+      "scientific_name_source": "Parkinsonia florida",
+      "scientific_name_accepted": null,
+      "native_status": "Native to Sonoran Desert",
+      "water_use": "Very Low",
+      "sun_requirement": "Full/reflected Sun",
+      "mature_height_ft": 30,
+      "mature_width_ft": 30,
+      "growth_rate": "Fast",
+      "desert_adapted": true,
+      "phoenix_recommended": true,
+      "amwua_listed": true,
+      "source_urls": [
+        "https://www.amwua.org/plants/blue-palo-verde",
+        "https://www.phoenix.gov/administration/departments/waterservices/supply-conservation/save-water/how-to-save-water/shade-trees-other-plants.html",
+        "https://www.phoenix.gov/administration/departments/streets/initiatives/cool-corridors.html"
+      ]
+    },
+    {
+      "id": "foothills-palo-verde",
+      "common_name": "Foothills Palo Verde",
+      "scientific_name_source": "Parkinsonia microphylla",
+      "scientific_name_accepted": null,
+      "native_status": "Native to Sonoran Desert",
+      "water_use": "Very Low",
+      "sun_requirement": "Full/reflected Sun",
+      "mature_height_ft": 15,
+      "mature_width_ft": 15,
+      "growth_rate": "Slow-moderate",
+      "desert_adapted": true,
+      "phoenix_recommended": true,
+      "amwua_listed": true,
+      "source_urls": [
+        "https://www.amwua.org/plants/foothills-palo-verde",
+        "https://www.phoenix.gov/administration/departments/waterservices/supply-conservation/save-water/how-to-save-water/shade-trees-other-plants.html"
+      ]
+    },
+    {
+      "id": "ironwood",
+      "common_name": "Ironwood",
+      "scientific_name_source": "Olneya tesota",
+      "scientific_name_accepted": null,
+      "native_status": "Native to Sonoran Desert",
+      "water_use": "Very Low",
+      "sun_requirement": "Full Sun",
+      "mature_height_ft": 25,
+      "mature_width_ft": 25,
+      "growth_rate": "Slow",
+      "desert_adapted": true,
+      "phoenix_recommended": true,
+      "amwua_listed": true,
+      "source_urls": [
+        "https://www.amwua.org/plants/ironwood",
+        "https://www.phoenix.gov/administration/departments/waterservices/supply-conservation/save-water/how-to-save-water/shade-trees-other-plants.html"
+      ]
+    },
+    {
+      "id": "velvet-mesquite",
+      "common_name": "Velvet Mesquite",
+      "scientific_name_source": "Prosopis velutina",
+      "scientific_name_accepted": null,
+      "native_status": "Native to Chihuahuan and Sonoran Deserts",
+      "water_use": "Very Low",
+      "sun_requirement": "Full/reflected Sun",
+      "mature_height_ft": 25,
+      "mature_width_ft": 25,
+      "growth_rate": "Moderate-fast",
+      "desert_adapted": true,
+      "phoenix_recommended": true,
+      "amwua_listed": true,
+      "source_urls": [
+        "https://www.amwua.org/plants/velvet-mesquite",
+        "https://www.phoenix.gov/administration/departments/waterservices/supply-conservation/save-water/how-to-save-water/shade-trees-other-plants.html"
+      ]
+    },
+    {
+      "id": "whitethorn-acacia",
+      "common_name": "Whitethorn Acacia",
+      "scientific_name_source": "Vachellia constricta",
+      "scientific_name_accepted": null,
+      "native_status": "Native to southwestern US and northern Mexico",
+      "water_use": "Very Low",
+      "sun_requirement": "Full Sun",
+      "mature_height_ft": 10,
+      "mature_width_ft": 15,
+      "growth_rate": "Slow",
+      "desert_adapted": true,
+      "phoenix_recommended": true,
+      "amwua_listed": true,
+      "source_urls": [
+        "https://www.amwua.org/plants/whitethorn-acacia",
+        "https://www.phoenix.gov/administration/departments/waterservices/supply-conservation/save-water/how-to-save-water/shade-trees-other-plants.html"
+      ]
+    },
+    {
+      "id": "mulga",
+      "common_name": "Mulga",
+      "scientific_name_source": "Acacia aneura",
+      "scientific_name_accepted": null,
+      "native_status": "Native to Australia",
+      "water_use": "Low",
+      "sun_requirement": "Full/reflected Sun",
+      "mature_height_ft": 20,
+      "mature_width_ft": 15,
+      "growth_rate": "Slow-moderate",
+      "desert_adapted": true,
+      "phoenix_recommended": true,
+      "amwua_listed": true,
+      "source_urls": [
+        "https://www.amwua.org/plants/mulga",
+        "https://www.phoenix.gov/administration/departments/streets/initiatives/cool-corridors.html"
+      ]
+    },
+    {
+      "id": "ghost-gum",
+      "common_name": "Ghost Gum",
+      "scientific_name_source": "Corymbia papuana",
+      "scientific_name_accepted": null,
+      "native_status": "Native to New Guinea and Australia",
+      "water_use": "Low",
+      "sun_requirement": "Full/reflected Sun",
+      "mature_height_ft": 40,
+      "mature_width_ft": 25,
+      "growth_rate": "Moderate",
+      "desert_adapted": true,
+      "phoenix_recommended": true,
+      "amwua_listed": true,
+      "source_urls": [
+        "https://www.amwua.org/plants/ghost-gum",
+        "https://www.phoenix.gov/administration/departments/streets/initiatives/cool-corridors.html"
+      ]
+    },
+    {
+      "id": "live-oak",
+      "common_name": "Live Oak",
+      "scientific_name_source": "Quercus virginiana",
+      "scientific_name_accepted": null,
+      "native_status": "Native to southeastern US",
+      "water_use": "Moderate",
+      "sun_requirement": "Full Sun",
+      "mature_height_ft": 40,
+      "mature_width_ft": 50,
+      "growth_rate": "Moderate",
+      "desert_adapted": true,
+      "phoenix_recommended": true,
+      "amwua_listed": true,
+      "source_urls": [
+        "https://www.amwua.org/plants/live-oak",
+        "https://www.phoenix.gov/administration/departments/streets/initiatives/cool-corridors.html"
+      ]
+    },
+    {
+      "id": "evergreen-elm",
+      "common_name": "Evergreen Elm",
+      "scientific_name_source": "Ulmus parvifolia",
+      "scientific_name_accepted": null,
+      "native_status": "Native to China",
+      "water_use": "Moderate",
+      "sun_requirement": "Full Sun",
+      "mature_height_ft": 35,
+      "mature_width_ft": 35,
+      "growth_rate": "Fast",
+      "desert_adapted": true,
+      "phoenix_recommended": true,
+      "amwua_listed": true,
+      "source_urls": [
+        "https://www.amwua.org/plants/evergreen-elm",
+        "https://www.phoenix.gov/administration/departments/streets/initiatives/cool-corridors.html"
+      ]
+    },
+    {
+      "id": "desert-willow",
+      "common_name": "Desert Willow",
+      "scientific_name_source": "Chilopsis linearis",
+      "scientific_name_accepted": null,
+      "native_status": "Native to southwestern US and northern Mexico",
+      "water_use": "Low",
+      "sun_requirement": "Full Sun",
+      "mature_height_ft": 25,
+      "mature_width_ft": 20,
+      "growth_rate": "Fast",
+      "desert_adapted": true,
+      "phoenix_recommended": false,
+      "amwua_listed": true,
+      "source_urls": [
+        "https://www.amwua.org/plants/desert-willow"
+      ]
+    }
+  ]
+}

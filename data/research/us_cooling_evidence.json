@@ -1,0 +1,122 @@
+{
+  "database_id": "coolcity_us_air_temperature_evidence_v1",
+  "model_parameters": {
+    "tree_canopy": {
+      "lower_c_per_tree_cover_percentage_point": 0.003,
+      "central_c_per_tree_cover_percentage_point": 0.01,
+      "upper_c_per_tree_cover_percentage_point": 0.025,
+      "supported_maximum_increase_percentage_points": 40
+    },
+    "cool_roof": {
+      "lower_c_at_100_pct": 0.08,
+      "central_c_at_100_pct": 0.467,
+      "upper_c_at_100_pct": 0.66,
+      "supported_maximum_pct": 100,
+      "central_derivation": "Hot-arid Phoenix receives weight 2 and Kansas City weight 1: (2*0.66 + 1*0.08)/3 = 0.4667 C."
+    },
+    "cool_pavement": {
+      "lower_c_at_100_pct": 0.0,
+      "central_c_at_100_pct": 0.306,
+      "upper_c_at_100_pct": 0.5,
+      "supported_maximum_pct": 100
+    },
+    "combination": {
+      "additional_intervention_factor": 0.75,
+      "description": "The largest contribution is retained fully; each additional contribution is multiplied by 0.75 to reduce double counting."
+    },
+    "local_calibration": {
+      "minimum_samples": 10,
+      "minimum_temperature_range_c": 0.1,
+      "minimum_tree_cover_range_percentage_points": 1.0,
+      "minimum_r_squared": 0.2,
+      "minimum_multiplier": 0.8,
+      "maximum_multiplier": 1.2
+    }
+  },
+  "entries": [
+    {
+      "id": "south-tacoma-street-trees-2022",
+      "study": "Street trees provide an opportunity to mitigate urban heat and reduce risk of high heat exposure",
+      "location": "South Tacoma",
+      "us_state": "Washington",
+      "climate_context": "Marine west coast",
+      "intervention_type": "tree_canopy",
+      "metric_type": "observed relationship",
+      "air_temperature_or_surface_temperature": "air_temperature",
+      "effect_relationship": "Published observed air-temperature/tree-canopy relationship supports the lower and central tree-cover screening coefficients.",
+      "units": "degrees C per tree-cover percentage point",
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10801627/",
+      "notes": "Observational association; not a universal causal coefficient."
+    },
+    {
+      "id": "denver-land-cover-air-temperature-2022",
+      "study": "Urban landcover differentially drives day and nighttime air temperature across a semi-arid city",
+      "location": "Denver",
+      "us_state": "Colorado",
+      "climate_context": "Semi-arid",
+      "intervention_type": "tree_canopy",
+      "metric_type": "observed relationship",
+      "air_temperature_or_surface_temperature": "air_temperature",
+      "effect_relationship": "Published daytime tree-cover coefficient supports the upper tree-cover screening coefficient.",
+      "units": "degrees C per tree-cover percentage point",
+      "source_url": "https://doi.org/10.1016/j.scitotenv.2022.158501",
+      "notes": "Cross-sectional land-cover relationship; used as a screening bound."
+    },
+    {
+      "id": "madison-scale-canopy-2019",
+      "study": "Scale-dependent interactions between tree canopy cover and impervious surfaces reduce daytime urban heat during summer",
+      "location": "Madison",
+      "us_state": "Wisconsin",
+      "climate_context": "Humid continental",
+      "intervention_type": "tree_canopy",
+      "metric_type": "observed nonlinear relationship",
+      "air_temperature_or_surface_temperature": "air_temperature",
+      "effect_relationship": "Canopy response is nonlinear and scale dependent.",
+      "units": "degrees C",
+      "source_url": "https://doi.org/10.1073/pnas.1817561116",
+      "notes": "Supports conservative ranges and extrapolation warnings."
+    },
+    {
+      "id": "broadbent-cool-roofs-2020",
+      "study": "Efficacy of cool roofs at reducing pedestrian-level air temperature during projected 21st century heatwaves in Atlanta, Detroit, and Phoenix",
+      "location": "Phoenix, Atlanta, and Detroit",
+      "us_state": "Arizona, Georgia, and Michigan",
+      "climate_context": "Hot-arid, humid subtropical, and humid continental",
+      "intervention_type": "cool_roof",
+      "metric_type": "modeled city-average daytime maximum",
+      "air_temperature_or_surface_temperature": "air_temperature",
+      "effect_relationship": "Extensive cool-roof deployment produced maximum city-averaged daytime cooling of 0.66 C in Phoenix, 0.38 C in Atlanta, and 0.42 C in Detroit.",
+      "units": "degrees C at extensive deployment",
+      "source_url": "https://doi.org/10.1088/1748-9326/ab6a23",
+      "notes": "Phoenix value is assigned stronger relevance for the hot-arid demo; scenario coverage is scaled linearly for MVP screening."
+    },
+    {
+      "id": "kansas-city-cool-roofs-2021",
+      "study": "Modeling potential air temperature reductions yielded by cool roofs and urban irrigation in the Kansas City Metropolitan Area",
+      "location": "Kansas City metropolitan area",
+      "us_state": "Missouri and Kansas",
+      "climate_context": "Humid continental/subtropical transition",
+      "intervention_type": "cool_roof",
+      "metric_type": "modeled regional average daytime",
+      "air_temperature_or_surface_temperature": "air_temperature",
+      "effect_relationship": "Raising roof albedo by 0.40 produced 0.08 C regional-average daytime cooling under typical summer conditions.",
+      "units": "degrees C at full modeled deployment",
+      "source_url": "https://doi.org/10.1016/j.uclim.2021.100833",
+      "notes": "Used as the lower cool-roof evidence point."
+    },
+    {
+      "id": "phoenix-cool-pavement-phase-ii-2024",
+      "study": "City of Phoenix Cool Pavement Pilot Program Phase II",
+      "location": "Phoenix",
+      "us_state": "Arizona",
+      "climate_context": "Hot-arid",
+      "intervention_type": "cool_pavement",
+      "metric_type": "observed neighborhood air temperature",
+      "air_temperature_or_surface_temperature": "air_temperature",
+      "effect_relationship": "Stationary measurements averaged 0.9 F (0.5 C) cooler over CoolSeal across measured heights and times; the report used 0.55 F (0.306 C) as a widespread-deployment screening estimate and documented some post-sunset reversals.",
+      "units": "degrees C",
+      "source_url": "https://globalfutures.asu.edu/blog/wp-content/uploads/2024/11/COPE_Phase2_Report_FINALOct24.pdf",
+      "notes": "Mixed hourly signs justify a zero lower bound and explicit uncertainty; policy coverage is scaled linearly for MVP screening."
+    }
+  ]
+}
