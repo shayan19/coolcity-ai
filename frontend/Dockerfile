@@ -1,9 +1,10 @@
-FROM node:22-alpine
+FROM node:24.19.0-alpine
 
 WORKDIR /app/frontend
 
 COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci
+RUN npm install --global "npm@11.17.0" \
+    && npm ci
 
 COPY frontend ./
 COPY data /app/data

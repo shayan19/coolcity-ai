@@ -102,13 +102,26 @@ The evidence database records each source, US location, climate context, metric,
 
 ## Quick start
 
+### Exact tested versions
+
+| Layer | Release baseline | How it is reproduced |
+|---|---:|---|
+| Python | `3.12.13` | `.python-version` |
+| pip | `26.2.1` | Windows setup and backend Docker image |
+| Node.js | `24.19.0` | `.nvmrc` and frontend Docker image |
+| npm | `11.17.0` | `packageManager` metadata and frontend Docker image |
+| Python libraries | Every direct and transitive version pinned | `backend/requirements*.lock.txt` |
+| Frontend libraries | Every direct and transitive version plus integrity hashes locked | `frontend/package-lock.json` |
+
+The release was validated with this exact toolchain. Python 3.12 and Node.js 20.9 or newer remain supported for local use, but use the versions above when you need the closest possible reproduction of the judged build. See [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md) for the dependency-file contract and update process.
+
 ### One-click Windows start
 
-Prerequisites: **Python 3.12** and **Node.js 20.9+** (the current Node LTS release is recommended).
+Prerequisites: **Python 3.12** and **Node.js 20.9+**. The exact tested versions are **Python 3.12.13** and **Node.js 24.19.0**.
 
 1. Download or clone this repository.
 2. Double-click `start_coolcity.cmd`.
-3. On the first run, it calls `setup_coolcity.cmd`, creates `.venv` only if missing, installs pinned Python dependencies, runs `npm ci` from the lockfile, and creates a safe local `.env` template if needed.
+3. On the first run, it calls `setup_coolcity.cmd`, creates `.venv` only if missing, installs pip `26.2.1` and the fully locked Python graph, runs `npm ci` from the npm lockfile, and creates a safe local `.env` template if needed.
 4. Add your FortyGuard key to `.env`, restart if necessary, and open [http://localhost:3000](http://localhost:3000).
 
 The launcher reuses an existing root `.venv`, never installs Python packages globally, verifies both HTTP services, and opens the browser. You can also double-click `setup_coolcity.cmd` separately to refresh all dependencies after pulling changes.
@@ -120,7 +133,8 @@ Copy-Item .env.example .env
 # Edit .env and set FORTYGUARD_API_KEY. Never commit this file.
 
 py -3.12 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r backend\requirements-dev.txt
+.\.venv\Scripts\python.exe -m pip install "pip==26.2.1"
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements-dev.lock.txt
 
 Set-Location frontend
 npm.cmd ci

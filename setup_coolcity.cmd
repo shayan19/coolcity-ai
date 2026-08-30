@@ -34,8 +34,15 @@ if not exist "%VENV_PYTHON%" (
   echo Reusing the existing .venv.
 )
 
-echo Installing pinned backend dependencies...
-"%VENV_PYTHON%" -m pip install --requirement "%PROJECT_ROOT%\backend\requirements-dev.txt"
+"%VENV_PYTHON%" -c "import sys; raise SystemExit(0 if sys.version_info[:2] == (3, 12) else 1)" >nul 2>&1
+if errorlevel 1 goto old_python
+
+echo Installing the tested pip version...
+"%VENV_PYTHON%" -m pip install "pip==26.2.1"
+if errorlevel 1 goto install_failed
+
+echo Installing fully locked backend dependencies...
+"%VENV_PYTHON%" -m pip install --requirement "%PROJECT_ROOT%\backend\requirements-dev.lock.txt"
 if errorlevel 1 goto install_failed
 
 echo Installing locked frontend dependencies...
@@ -88,6 +95,11 @@ goto fatal
 :missing_python
 echo ERROR: Python 3.12 was not found or could not create .venv.
 echo Install Python 3.12 from https://www.python.org/ and retry.
+goto fatal
+
+:old_python
+echo ERROR: The existing .venv does not use Python 3.12.
+echo Rename or remove that local folder, install Python 3.12.13, and retry.
 goto fatal
 
 :broken_venv
