@@ -17,6 +17,8 @@ CoolCity helps a planner move from observed neighborhood heat to an explainable 
 7. Review the modeled temperature reduction, uncertainty range, target gap, annual mature-canopy CO2 sequestration, and an illustrative Heat Mitigation Incentive tier.
 8. Generate a printable decision report with source and verification status.
 
+The analysis-area safety ceiling is **10 km²**, enforced in both the browser and backend. FortyGuard cell-size choices are **50 m, 100 m, 250 m, and 500 m**; finer cells produce more features and larger provider responses.
+
 ## Who it is for
 
 CoolCity is designed for city and state governments, urban planners, sustainability teams, public-works agencies, campuses, and researchers. It changes decisions about which heat hotspots to prioritize, which interventions merit field review, and whether a proposed portfolio can plausibly reach a stated cooling target.
@@ -91,9 +93,11 @@ An optional local AOI regression can adjust the tree coefficient only when there
 
 The optimizer returns:
 
-- **Low Intervention:** a restrained reference portfolio;
-- **Balanced:** the lowest modeled intervention intensity that reaches the target when feasible; and
-- **Maximum Cooling:** the strongest portfolio within planner-set limits.
+- **Low Intervention:** maximizes predicted cooling within a centralized 25% normalized intervention-intensity cap;
+- **Balanced:** chooses the lowest-intensity portfolio that reaches the target, or, when the target is unreachable, the lowest-intensity portfolio that delivers at least 80% of maximum feasible cooling; and
+- **Maximum Cooling:** maximizes predicted temperature reduction within planner-set feasibility limits.
+
+Normalized intervention intensity is the average fraction of the enabled tree, roof, and pavement limits. Balanced and Maximum can match only when no lower-intensity candidate satisfies the applicable Balanced requirement.
 
 If a target is unreachable, CoolCity shows the remaining gap instead of claiming success. Counterfactual results are CoolCity screening estimates, never FortyGuard forecasts or guaranteed cooling.
 

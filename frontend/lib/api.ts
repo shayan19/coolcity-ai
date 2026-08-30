@@ -8,7 +8,8 @@ import { parseTemporalAnalysisResult, type FortyGuardTemporalAnalytic, type Temp
 import { buildFortyGuardSubmitRequest, fortyGuardHeaders } from "./fortyguard-key";
 
 export type { TemperatureAnalysisResult };
-export type LiveAnalysisOptions = { date: string; time: string; granularity: 60 | 80 | 100; threshold_c: number };
+export type FortyGuardGranularity = 50 | 100 | 250 | 500;
+export type LiveAnalysisOptions = { date: string; time: string; granularity: FortyGuardGranularity; threshold_c: number };
 export type SiteGeometry = Polygon;
 
 export type LandCoverAnalysisResult = {

@@ -37,6 +37,8 @@ FortyGuard observed temperature cells
 
 The selected `temperature_c` remains immutable. The model estimates only `estimated_temperature_reduction_c`; the post-policy value is baseline minus that delta.
 
+The AOI safety limit is 10 km² in both frontend and backend validation. Supported FortyGuard granularities are 50 m, 100 m, 250 m, and 500 m. The optimizer evaluates the unchanged cooling-response equations with three distinct objectives: Low maximizes cooling below a 25% normalized-intensity cap, Balanced minimizes intensity subject to the target or an 80%-of-maximum fallback, and Maximum maximizes predicted cooling.
+
 ## Credential boundary, safety, and caching
 
 The user enters a FortyGuard key into a password field in the browser. React holds it only in current page memory and sends it to FastAPI in `X-FortyGuard-API-Key` when submitting or polling; it is never placed in the JSON body, URL, local/session storage, report, frontend environment, or browser bundle. FastAPI keeps it in request memory, forwards it to FortyGuard's `api-key` header, and does not log, return, or write the raw value. A root `.env` key remains an optional operator fallback for direct backend clients. Public deployments must use HTTPS because the backend necessarily receives the user's key to call FortyGuard.

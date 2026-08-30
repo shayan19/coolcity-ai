@@ -10,10 +10,10 @@ CoolCity AI is a FortyGuard-first urban temperature intelligence product for For
 6. Tree-canopy changes are conceptual mature-canopy scenarios requiring field verification.
 7. Carbon results are annual sequestration estimates, not automatically avoided emissions.
 8. Deleted shade and quantitative water features must not be reintroduced without an explicit product decision.
-9. Keep secrets in environment variables; never commit `.env`, hard-code a key, or expose credentials to the browser.
-10. FortyGuard integration stays server-side. Never log, cache, return, or print its API key.
+9. Never commit `.env`, hard-code a key, persist a user-entered key, or place credentials in a frontend bundle or public environment variable.
+10. FortyGuard provider calls stay server-side. The browser may send a user-entered key only in the dedicated request header; never log, cache, return, or print its raw value.
 11. Automated tests must make zero external-provider calls and consume zero FortyGuard credits.
-12. FortyGuard work requires an explicit analysis action. There is no demo-temperature source or browser-side live toggle; credentials remain server-side.
+12. FortyGuard work requires an explicit analysis action. There is no demo-temperature source or browser-side live toggle; a user-entered credential remains only in page memory and backend request memory.
 13. Reuse matching in-progress and cached completed FortyGuard work; do not duplicate submissions.
 14. Normalize provider responses server-side, preserve original feature properties, and expose `temperature_c`.
 15. Use the root `.venv`; do not create another environment or install Python packages globally.
@@ -55,3 +55,8 @@ CoolCity AI is a FortyGuard-first urban temperature intelligence product for For
 51. Verification state must be explicit; never claim proposed work is installed, verified, or maintained.
 52. Budget optimization is policy screening, not complete economic welfare optimization.
 53. The selected geometry is a policy assessment area, not a claimed legal parcel or tax account.
+54. The analysis-area safety ceiling is 10 km² and must be enforced by both frontend and backend validation.
+55. Supported FortyGuard cell sizes are 50 m, 100 m, 250 m, and 500 m.
+56. Low Intervention maximizes cooling within the centralized low-intensity cap.
+57. Balanced minimizes intensity while meeting the target, or at least 80% of maximum feasible cooling when the target is unreachable.
+58. Maximum Cooling maximizes predicted temperature reduction; optimizer objectives must not alter the cooling-response equations.

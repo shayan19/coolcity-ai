@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { LiveAnalysisOptions } from "../lib/api";
+import type { FortyGuardGranularity, LiveAnalysisOptions } from "../lib/api";
 import type { FortyGuardTemporalAnalytic } from "../lib/temporal-contract";
 
 export type FortyGuardAnalytic = "tcm" | FortyGuardTemporalAnalytic;
@@ -27,7 +27,7 @@ export default function DataSourceSelector(props: {
     <div className="live-controls">
       <label><span>Date</span><input type="date" value={props.liveOptions.date} onChange={(event) => props.onLiveOptionsChange({ ...props.liveOptions, date: event.target.value })} /></label>
       <label><span>Time</span><input type="time" value={props.liveOptions.time} onChange={(event) => props.onLiveOptionsChange({ ...props.liveOptions, time: event.target.value })} /></label>
-      <label><span>Cell size</span><select value={props.liveOptions.granularity} onChange={(event) => props.onLiveOptionsChange({ ...props.liveOptions, granularity: Number(event.target.value) as 60 | 80 | 100 })}><option value={100}>100 m</option><option value={80}>80 m</option><option value={60}>60 m</option></select></label>
+      <label><span>Cell size</span><select value={props.liveOptions.granularity} onChange={(event) => props.onLiveOptionsChange({ ...props.liveOptions, granularity: Number(event.target.value) as FortyGuardGranularity })}><option value={50}>50 m</option><option value={100}>100 m</option><option value={250}>250 m</option><option value={500}>500 m</option></select></label>
       {props.analytic === "exceedance" || props.analytic === "persistence" ? <label><span>Heat threshold (°C)</span><input type="number" min={-30} max={70} step={0.5} value={props.liveOptions.threshold_c} onChange={(event) => props.onLiveOptionsChange({ ...props.liveOptions, threshold_c: Number(event.target.value) })} /></label> : null}
     </div>
   </section>;

@@ -6,7 +6,7 @@ Current coverage: United States. Provider coverage validation handles unsupporte
 
 ## Decision workflow
 
-1. Select a US area of interest.
+1. Select a US area of interest no larger than 10 km² and choose a 50 m, 100 m, 250 m, or 500 m FortyGuard cell size.
 2. Use FortyGuard to diagnose temperature, peak heat time, exceedance, or persistence.
 3. Inspect stable `FG-*` labels, the thermal ranking, and a selected cell's FortyGuard Thermal Profile.
 4. Attach ESA WorldCover 2021 historical land-cover context.
@@ -35,6 +35,9 @@ Current coverage: United States. Provider coverage validation handles unsupporte
 - Higher heat can increase assistance eligibility but never tax liability.
 - Incentive screening uses no personal demographics or protected characteristics and always requires municipal review.
 - Budget allocation compares only real assessed sites and is not a complete social-welfare model.
+- Low Intervention maximizes modeled cooling under a 25% normalized-intensity cap.
+- Balanced minimizes normalized intervention intensity while meeting the target; if unreachable, it must deliver at least 80% of maximum feasible cooling.
+- Maximum Cooling maximizes the unchanged cooling-response model's predicted temperature reduction within configured feasibility limits.
 
 ## Users
 

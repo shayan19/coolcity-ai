@@ -10,7 +10,11 @@ import {
   type CarbonEvidence,
   type CoolingEvidence,
 } from "../lib/cooling-response-model.ts";
-import { optimizePolicyPortfolio } from "../lib/policy-optimizer.ts";
+import {
+  BALANCED_UNREACHABLE_COOLING_FRACTION,
+  LOW_INTERVENTION_INTENSITY_CAP,
+  optimizePolicyPortfolio,
+} from "../lib/policy-optimizer.ts";
 import type { TreeSpecies } from "../lib/species-core.ts";
 
 const evidence = JSON.parse(readFileSync(new URL("../../data/research/us_cooling_evidence.json", import.meta.url), "utf8")) as CoolingEvidence;
@@ -81,16 +85,23 @@ test("optimizer returns low, balanced, and exact maximum portfolios without forc
   assert.deepEqual(optimized.plans.map((plan) => plan.plan_type), ["low_intervention", "balanced", "maximum_cooling"]);
   assert.equal(optimized.target_achievable, false);
   assert.ok(optimized.plans[1].remaining_target_gap_c > 0);
+  assert.equal(optimized.balanced_rule, "eighty_percent_of_maximum");
+  assert.ok(optimized.plans[0].intervention_intensity <= LOW_INTERVENTION_INTENSITY_CAP);
+  assert.ok(optimized.plans[1].central_estimate_c >= optimized.maximum_feasible_cooling_c * BALANCED_UNREACHABLE_COOLING_FRACTION);
   assert.equal(optimized.plans[2].tree_count, 20);
   assert.equal(optimized.plans[2].cool_roof_pct, 40);
   assert.equal(optimized.plans[2].cool_pavement_pct, 30);
 });
 
-test("optimizer uses zero intervention when target is already satisfied", () => {
+test("balanced uses zero intervention when target is already satisfied while low and maximum retain their distinct objectives", () => {
   const allCells = cells();
   const optimized = optimizePolicyPortfolio({ selectedCell: allCells.features[0] as Feature<Polygon, Record<string, unknown>>, allCells, species, targetTemperatureC: 45, allowedTreeCountMax: 20, coolRoofMaximumPct: 40, coolPavementMaximumPct: 30, evidence, carbonEvidence: carbon });
   assert.equal(optimized.required_reduction_c, 0);
-  assert.ok(optimized.plans.slice(0, 2).every((plan) => plan.tree_count === 0 && plan.cool_roof_pct === 0 && plan.cool_pavement_pct === 0));
+  assert.equal(optimized.balanced_rule, "no_intervention_needed");
+  assert.equal(optimized.plans[1].intervention_intensity, 0);
+  assert.ok(optimized.plans[0].central_estimate_c > 0);
+  assert.ok(optimized.plans[0].intervention_intensity <= LOW_INTERVENTION_INTENSITY_CAP);
+  assert.ok(optimized.plans[2].central_estimate_c >= optimized.plans[0].central_estimate_c);
 });
 
 test("balanced plan reaches a small feasible target with no negative or over-limit inputs", () => {
@@ -98,8 +109,28 @@ test("balanced plan reaches a small feasible target with no negative or over-lim
   const optimized = optimizePolicyPortfolio({ selectedCell: allCells.features[0] as Feature<Polygon, Record<string, unknown>>, allCells, species, targetTemperatureC: 43.8, allowedTreeCountMax: 40, coolRoofMaximumPct: 60, coolPavementMaximumPct: 40, evidence, carbonEvidence: carbon });
   const balanced = optimized.plans[1];
   assert.equal(optimized.target_achievable, true);
+  assert.equal(optimized.balanced_rule, "target");
   assert.equal(balanced.target_achieved, true);
   assert.ok(balanced.tree_count >= 0 && balanced.cool_roof_pct >= 0 && balanced.cool_roof_pct <= 60 && balanced.cool_pavement_pct >= 0 && balanced.cool_pavement_pct <= 40);
+  assert.ok(balanced.intervention_intensity < optimized.plans[2].intervention_intensity);
+  assert.ok(optimized.plans[2].central_estimate_c >= balanced.central_estimate_c);
+});
+
+test("balanced and maximum match only when no lower-intensity candidate can meet the balanced rule", () => {
+  const allCells = cells();
+  const separated = optimizePolicyPortfolio({ selectedCell: allCells.features[0] as Feature<Polygon, Record<string, unknown>>, allCells, species, targetTemperatureC: 35, allowedTreeCountMax: 20, coolRoofMaximumPct: 40, coolPavementMaximumPct: 30, evidence, carbonEvidence: carbon });
+  assert.ok(separated.plans[1].intervention_intensity < separated.plans[2].intervention_intensity);
+  assert.ok(separated.plans[1].central_estimate_c >= separated.balanced_cooling_requirement_c);
+
+  const onlyMaximumQualifies = optimizePolicyPortfolio({ selectedCell: allCells.features[0] as Feature<Polygon, Record<string, unknown>>, allCells, species, targetTemperatureC: 35, allowedTreeCountMax: 1, coolRoofMaximumPct: 0, coolPavementMaximumPct: 0, evidence, carbonEvidence: carbon });
+  assert.equal(onlyMaximumQualifies.balanced_rule, "eighty_percent_of_maximum");
+  assert.ok(onlyMaximumQualifies.balanced_cooling_requirement_c > 0);
+  assert.equal(onlyMaximumQualifies.plans[1].tree_count, onlyMaximumQualifies.plans[2].tree_count);
+  assert.equal(onlyMaximumQualifies.plans[1].cool_roof_pct, onlyMaximumQualifies.plans[2].cool_roof_pct);
+  assert.equal(onlyMaximumQualifies.plans[1].cool_pavement_pct, onlyMaximumQualifies.plans[2].cool_pavement_pct);
+  assert.equal(onlyMaximumQualifies.plans[1].central_estimate_c, onlyMaximumQualifies.plans[2].central_estimate_c);
+  assert.equal(onlyMaximumQualifies.plans[1].intervention_intensity, onlyMaximumQualifies.plans[2].intervention_intensity);
+  assert.ok(onlyMaximumQualifies.plans[1].central_estimate_c >= onlyMaximumQualifies.balanced_cooling_requirement_c);
 });
 
 test("evidence database contains US air-temperature evidence and no fabricated training rows", () => {

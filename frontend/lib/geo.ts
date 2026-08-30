@@ -1,7 +1,7 @@
 import { area } from "@turf/area";
 import type { Feature, Polygon } from "geojson";
 
-import { MAX_ANALYSIS_AREA_M2, MIN_ANALYSIS_AREA_M2 } from "./config";
+import { MAX_ANALYSIS_AREA_M2, MIN_ANALYSIS_AREA_M2 } from "./config.ts";
 
 export type SitePolygonFeature = Feature<Polygon, { mode?: "polygon" }>;
 
@@ -15,7 +15,7 @@ export function getAreaValidationMessage(areaM2: number): string | null {
   }
 
   if (areaM2 > MAX_ANALYSIS_AREA_M2) {
-    return "Please select an area smaller than 2 km².";
+    return "Please select an area no larger than 10 km².";
   }
 
   return null;

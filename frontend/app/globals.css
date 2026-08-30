@@ -82,8 +82,9 @@ button { cursor: pointer; }
 .plan-card span,.plan-card small { grid-column: 1 / -1; font-size: .62rem; }.plan-card b { color: #177052; }.plan-card.selected { border: 2px solid #177052; background: #edf8f3; }
 .target-status { padding: .55rem; border-radius: .4rem; background: #fff1d6; color: #79570c; font-size: .7rem; font-weight: 750; }.target-status.achieved { background: #def3e9; color: #176c4f; }
 input, select { min-width: 0; padding: .48rem; border: 1px solid #cbd9d4; border-radius: .4rem; background: #fff; color: #17352d; }
-.site-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; margin: .6rem 0; }
-.site-buttons .text-button { grid-column: 1 / -1; }
+.site-buttons { display: flex; flex-direction: column; align-items: center; gap: .35rem; margin: .7rem 0; }
+.site-buttons .secondary-button { width: min(100%, 16rem); }
+.site-buttons .text-button { width: auto; padding-inline: 1.25rem; }
 .primary-button, .secondary-button, .text-button { width: 100%; padding: .58rem .7rem; border-radius: .45rem; font-weight: 750; }
 .primary-button { border: 1px solid #197758; background: #197758; color: #fff; }
 .secondary-button { border: 1px solid #8aa59b; background: #f8fbfa; color: #315f51; }
@@ -91,6 +92,7 @@ input, select { min-width: 0; padding: .48rem; border: 1px solid #cbd9d4; border
 button:disabled { opacity: .48; cursor: not-allowed; }
 .area-readout, .analysis-status { display: flex; justify-content: space-between; align-items: center; padding: .45rem; border-radius: .4rem; background: #eff5f2; font-size: .68rem; }
 .area-readout span, .area-readout strong, .area-readout small { display: block; }
+.area-limit-note { margin: .4rem 0 0; color: #4d7064; font-size: .66rem; font-weight: 750; text-align: center; }
 .analysis-status { margin-top: .35rem; }
 .validation-message, .analysis-error, .model-warning { padding: .5rem; border-radius: .4rem; background: #fff0f0; color: #ad4545; font-size: .68rem; }
 .empty-summary, .field-note, .method-note, .species-note, .peer-note, .landcover-baseline-note { color: #687e76; font-size: .68rem; line-height: 1.45; }
