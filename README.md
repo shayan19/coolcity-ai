@@ -38,6 +38,20 @@ The FastAPI backend submits the selected polygon, polls one provider activity, r
 
 The FortyGuard key is read only by the Python backend from the process environment or root `.env`. It is never returned by an endpoint, logged, copied into a `NEXT_PUBLIC_*` variable, embedded in the browser bundle, or included in a test fixture. Automated tests use local fakes and make zero provider calls.
 
+### FortyGuard API-key status
+
+The team tested the integration with a free FortyGuard API key, but that test credential is currently inactive. It is intentionally **not included** in this public repository. Consequently, live temperature analysis will not work until the person running CoolCity supplies their own active FortyGuard Temperature API key. The interface, policy model, reports, and automated tests can still be inspected without exposing or sharing a credential.
+
+To obtain and configure your own key:
+
+1. Review the official [FortyGuard API plans and trial access](https://www.fortyguard.com/api-pricing), then register or request the appropriate API access. FortyGuard states that a key is provided upon registration or through an organization's admin console.
+2. If a free, trial, or hackathon key was issued but does not activate, contact FortyGuard at [`support@fortyguard.com`](mailto:support@fortyguard.com). Do not post the key in a GitHub issue.
+3. Copy the safe template with `Copy-Item .env.example .env` from the repository root.
+4. Open the new local `.env` file and set `FORTYGUARD_API_KEY=your_own_active_key`. Leave `FORTYGUARD_BASE_URL=https://api.fortyguard.com` unchanged unless FortyGuard instructs you otherwise.
+5. Save `.env`, restart the CoolCity backend or rerun `start_coolcity.cmd`, draw a supported US area, and explicitly start a FortyGuard analysis.
+
+FortyGuard's [authentication guide](https://docs-api.fortyguard.com/docs/authentication) documents the required `api-key` request header; CoolCity adds it on the backend. A `401` response normally means the key is missing or invalid, `403` means the key's plan does not allow the request, and `429` means the request or credit limit has been reached. See the official [API quickstart](https://docs-api.fortyguard.com/docs/quickstart) for the current provider workflow.
+
 ## Architecture
 
 ```text
@@ -122,7 +136,7 @@ Prerequisites: **Python 3.12** and **Node.js 20.9+**. The exact tested versions 
 1. Download or clone this repository.
 2. Double-click `start_coolcity.cmd`.
 3. On the first run, it calls `setup_coolcity.cmd`, creates `.venv` only if missing, installs pip `26.2.1` and the fully locked Python graph, runs `npm ci` from the npm lockfile, and creates a safe local `.env` template if needed.
-4. Add your FortyGuard key to `.env`, restart if necessary, and open [http://localhost:3000](http://localhost:3000).
+4. Add your own active FortyGuard key to `.env`, restart if necessary, and open [http://localhost:3000](http://localhost:3000). The team's inactive free test key is not bundled; follow the [API-key procedure](#fortyguard-api-key-status) above.
 
 The launcher reuses an existing root `.venv`, never installs Python packages globally, verifies both HTTP services, and opens the browser. You can also double-click `setup_coolcity.cmd` separately to refresh all dependencies after pulling changes.
 
@@ -157,6 +171,8 @@ npm.cmd run dev -- --hostname 127.0.0.1
 ## Live and demo mode
 
 There is no mock or synthetic temperature mode in the product. A temperature analysis is available only after an explicit user action and requires a valid server-side FortyGuard key; it may consume provider quota. Completed provider and WorldCover results may be cached locally for efficient repeat use, but `data/cache/` is runtime data and is not committed.
+
+The team's free test key is currently inactive and is not published. A reviewer or new user must configure their own active key for live provider calls; CoolCity does not silently substitute synthetic temperature data when authentication fails.
 
 - **Live demo:** _add the public no-login deployment URL before submission_
 - **Demo video:** _add the public YouTube or Loom URL (maximum 3 minutes)_
