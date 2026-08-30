@@ -209,4 +209,4 @@ CoolCity is a policy-screening tool, not engineering design, tax advice, a causa
 - Quantitative water, shade/solar, Open-Meteo, and the removed OSM/Overpass building pipeline are intentionally absent.
 - OpenAI Codex assisted with release packaging, documentation, and validation; the project runtime itself uses deterministic analytical models rather than generative AI.
 
-Additional project contracts are documented in [`docs/PRODUCT.md`](docs/PRODUCT.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), and [`docs/HACKATHON_RULES.md`](docs/HACKATHON_RULES.md).
+Additional project contracts are documented in [`docs/PRODUCT.md`](docs/PRODUCT.md) and [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
