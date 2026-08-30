@@ -6,7 +6,7 @@ from pydantic import BaseModel, field_validator
 
 Position = tuple[float, float]
 EARTH_RADIUS_M = 6_371_008.8
-MAX_ANALYSIS_AREA_M2 = 10_000_000
+MAX_ANALYSIS_AREA_M2 = 5_000_000
 
 
 def _ring_area_m2(ring: list[Position]) -> float:
@@ -54,7 +54,7 @@ class PolygonGeometry(BaseModel):
         if len({point[0] for point in outer}) < 2 or len({point[1] for point in outer}) < 2:
             raise ValueError("Polygon must enclose a non-zero bounding area.")
         if _polygon_area_m2(normalized) > MAX_ANALYSIS_AREA_M2:
-            raise ValueError("Analysis area must be no larger than 10 square kilometers.")
+            raise ValueError("Analysis area must be no larger than 5 square kilometers.")
         return normalized
 
 
@@ -82,7 +82,7 @@ class FortyGuardSubmitRequest(BaseModel):
     geometry: PolygonGeometry
     date: str
     time: str
-    granularity: Literal[50, 100, 250, 500] = 100
+    granularity: Literal[100, 250, 500] = 100
     analytic_type: Literal["tcm", "time_of_measure", "exceedance", "persistence"] = "tcm"
     threshold_c: float = 40.0
 

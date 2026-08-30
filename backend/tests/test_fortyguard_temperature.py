@@ -325,16 +325,17 @@ def test_safe_http_errors(status_code: int, expected_message: str) -> None:
     assert "secret" not in error.value.safe_message
 
 
-def test_invalid_granularity_is_rejected() -> None:
+@pytest.mark.parametrize("granularity", [50, 75])
+def test_invalid_granularity_is_rejected(granularity: int) -> None:
     response = TestClient(app).post(
         "/api/temperature/submit",
-        json={**VALID_SUBMIT_BODY, "granularity": 75},
+        json={**VALID_SUBMIT_BODY, "granularity": granularity},
     )
 
     assert response.status_code == 422
 
 
-@pytest.mark.parametrize("granularity", [50, 100, 250, 500])
+@pytest.mark.parametrize("granularity", [100, 250, 500])
 def test_supported_granularities_are_preserved(granularity: int) -> None:
     request = FortyGuardSubmitRequest.model_validate(
         {**VALID_SUBMIT_BODY, "granularity": granularity}
@@ -343,28 +344,8 @@ def test_supported_granularities_are_preserved(granularity: int) -> None:
     assert build_fortyguard_payload(request)["granularity"] == granularity
 
 
-def test_analysis_area_above_ten_square_kilometers_is_rejected() -> None:
+def test_analysis_area_above_five_square_kilometers_is_rejected() -> None:
     oversized_geometry = {
-        "type": "Polygon",
-        "coordinates": [
-            [
-                [-112.10, 33.40],
-                [-112.05, 33.40],
-                [-112.05, 33.45],
-                [-112.10, 33.45],
-                [-112.10, 33.40],
-            ]
-        ],
-    }
-
-    with pytest.raises(ValueError, match="no larger than 10 square kilometers"):
-        FortyGuardSubmitRequest.model_validate(
-            {**VALID_SUBMIT_BODY, "geometry": oversized_geometry}
-        )
-
-
-def test_analysis_area_below_ten_square_kilometers_is_accepted() -> None:
-    near_limit_geometry = {
         "type": "Polygon",
         "coordinates": [
             [
@@ -372,6 +353,26 @@ def test_analysis_area_below_ten_square_kilometers_is_accepted() -> None:
                 [-112.07, 33.40],
                 [-112.07, 33.43],
                 [-112.10, 33.43],
+                [-112.10, 33.40],
+            ]
+        ],
+    }
+
+    with pytest.raises(ValueError, match="no larger than 5 square kilometers"):
+        FortyGuardSubmitRequest.model_validate(
+            {**VALID_SUBMIT_BODY, "geometry": oversized_geometry}
+        )
+
+
+def test_analysis_area_below_five_square_kilometers_is_accepted() -> None:
+    near_limit_geometry = {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [-112.10, 33.40],
+                [-112.08, 33.40],
+                [-112.08, 33.42],
+                [-112.10, 33.42],
                 [-112.10, 33.40],
             ]
         ],

@@ -17,7 +17,7 @@ CoolCity helps a planner move from observed neighborhood heat to an explainable 
 7. Review the modeled temperature reduction, uncertainty range, target gap, annual mature-canopy CO2 sequestration, and an illustrative Heat Mitigation Incentive tier.
 8. Generate a printable decision report with source and verification status.
 
-The analysis-area safety ceiling is **10 km²**, enforced in both the browser and backend. FortyGuard cell-size choices are **50 m, 100 m, 250 m, and 500 m**; finer cells produce more features and larger provider responses.
+The analysis-area safety ceiling is **5 km²**, enforced in both the browser and backend. FortyGuard cell-size choices are **100 m, 250 m, and 500 m**; finer cells produce more features and larger provider responses.
 
 ## Who it is for
 

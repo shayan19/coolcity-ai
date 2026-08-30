@@ -6,7 +6,7 @@ Current coverage: United States. Provider coverage validation handles unsupporte
 
 ## Decision workflow
 
-1. Select a US area of interest no larger than 10 km² and choose a 50 m, 100 m, 250 m, or 500 m FortyGuard cell size.
+1. Select a US area of interest no larger than 5 km² and choose a 100 m, 250 m, or 500 m FortyGuard cell size.
 2. Use FortyGuard to diagnose temperature, peak heat time, exceedance, or persistence.
 3. Inspect stable `FG-*` labels, the thermal ranking, and a selected cell's FortyGuard Thermal Profile.
 4. Attach ESA WorldCover 2021 historical land-cover context.

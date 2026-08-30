@@ -55,8 +55,8 @@ CoolCity AI is a FortyGuard-first urban temperature intelligence product for For
 51. Verification state must be explicit; never claim proposed work is installed, verified, or maintained.
 52. Budget optimization is policy screening, not complete economic welfare optimization.
 53. The selected geometry is a policy assessment area, not a claimed legal parcel or tax account.
-54. The analysis-area safety ceiling is 10 km² and must be enforced by both frontend and backend validation.
-55. Supported FortyGuard cell sizes are 50 m, 100 m, 250 m, and 500 m.
+54. The analysis-area safety ceiling is 5 km² and must be enforced by both frontend and backend validation.
+55. Supported FortyGuard cell sizes are 100 m, 250 m, and 500 m.
 56. Low Intervention maximizes cooling within the centralized low-intensity cap.
 57. Balanced minimizes intensity while meeting the target, or at least 80% of maximum feasible cooling when the target is unreachable.
 58. Maximum Cooling maximizes predicted temperature reduction; optimizer objectives must not alter the cooling-response equations.

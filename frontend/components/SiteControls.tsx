@@ -60,7 +60,7 @@ export default function SiteControls({
           </>
         )}
       </div>
-      <p className="area-limit-note">Maximum analysis area: 10 km²</p>
+      <p className="area-limit-note">Maximum analysis area: 5 km²</p>
 
       <div className={`analysis-status ${validationMessage ? "is-invalid" : ""}`}>
         <span>Status</span>

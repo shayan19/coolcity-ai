@@ -15,7 +15,7 @@ export function getAreaValidationMessage(areaM2: number): string | null {
   }
 
   if (areaM2 > MAX_ANALYSIS_AREA_M2) {
-    return "Please select an area no larger than 10 km².";
+    return "Please select an area no larger than 5 km².";
   }
 
   return null;

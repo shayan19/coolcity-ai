@@ -37,7 +37,7 @@ FortyGuard observed temperature cells
 
 The selected `temperature_c` remains immutable. The model estimates only `estimated_temperature_reduction_c`; the post-policy value is baseline minus that delta.
 
-The AOI safety limit is 10 km² in both frontend and backend validation. Supported FortyGuard granularities are 50 m, 100 m, 250 m, and 500 m. The optimizer evaluates the unchanged cooling-response equations with three distinct objectives: Low maximizes cooling below a 25% normalized-intensity cap, Balanced minimizes intensity subject to the target or an 80%-of-maximum fallback, and Maximum maximizes predicted cooling.
+The AOI safety limit is 5 km² in both frontend and backend validation. Supported FortyGuard granularities are 100 m, 250 m, and 500 m. The optimizer evaluates the unchanged cooling-response equations with three distinct objectives: Low maximizes cooling below a 25% normalized-intensity cap, Balanced minimizes intensity subject to the target or an 80%-of-maximum fallback, and Maximum maximizes predicted cooling.
 
 ## Credential boundary, safety, and caching
 
