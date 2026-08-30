@@ -135,10 +135,10 @@ Prerequisites: **Python 3.12** and **Node.js 20.9+**. The exact tested versions 
 
 1. Download or clone this repository.
 2. Double-click `start_coolcity.cmd`.
-3. On the first run, it calls `setup_coolcity.cmd`, creates `.venv` only if missing, installs pip `26.2.1` and the fully locked Python graph, runs `npm ci` from the npm lockfile, and creates a safe local `.env` template if needed.
+3. The launcher checks the Python version, required backend imports, `pip check`, both dependency-lock fingerprints, the Node.js version, and the installed npm graph. If anything is missing, broken, or outdated, it automatically calls `setup_coolcity.cmd`, creates `.venv` only if missing, installs pip `26.2.1` and the fully locked Python graph, runs `npm ci` from the npm lockfile, and verifies the installation before continuing.
 4. Add your own active FortyGuard key to `.env`, restart if necessary, and open [http://localhost:3000](http://localhost:3000). The team's inactive free test key is not bundled; follow the [API-key procedure](#fortyguard-api-key-status) above.
 
-The launcher reuses an existing root `.venv`, never installs Python packages globally, verifies both HTTP services, and opens the browser. You can also double-click `setup_coolcity.cmd` separately to refresh all dependencies after pulling changes.
+That is the complete one-click installation and start flow. The launcher reuses a healthy root `.venv`, never installs Python packages globally, repairs incomplete environments, verifies both HTTP services, and opens the browser. You can also double-click `setup_coolcity.cmd` separately to force a dependency refresh after pulling changes. `check_coolcity_dependencies.cmd` performs a read-only environment check and returns a failure code when automatic repair is required.
 
 ### Manual install and run
 

@@ -16,14 +16,19 @@ echo   CoolCity AI - One-click start
 echo ========================================
 echo.
 
-if not exist "%BACKEND_PYTHON%" goto run_setup
-if not exist "%FRONTEND_DIR%\node_modules\next\package.json" goto run_setup
+call "%PROJECT_ROOT%\check_coolcity_dependencies.cmd" >nul 2>&1
+if errorlevel 1 goto run_setup
+echo Locked dependencies verified.
 goto setup_complete
 
 :run_setup
-echo First run detected. Installing the locked dependencies...
+echo Missing, broken, or outdated dependencies detected.
+echo Creating or repairing the local environments automatically...
 call "%PROJECT_ROOT%\setup_coolcity.cmd" --no-pause
 if errorlevel 1 goto fatal
+call "%PROJECT_ROOT%\check_coolcity_dependencies.cmd" >nul 2>&1
+if errorlevel 1 goto dependency_verification_failed
+echo Locked dependencies installed and verified.
 
 :setup_complete
 if not exist "%BACKEND_PYTHON%" goto missing_python
@@ -174,6 +179,11 @@ goto fatal
 
 :missing_package
 echo ERROR: frontend\package.json was not found.
+goto fatal
+
+:dependency_verification_failed
+echo ERROR: Dependency verification failed after automatic setup.
+echo Run setup_coolcity.cmd to see the detailed installation output.
 goto fatal
 
 :fatal

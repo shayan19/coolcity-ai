@@ -44,13 +44,35 @@ if errorlevel 1 goto install_failed
 echo Installing fully locked backend dependencies...
 "%VENV_PYTHON%" -m pip install --requirement "%PROJECT_ROOT%\backend\requirements-dev.lock.txt"
 if errorlevel 1 goto install_failed
+"%VENV_PYTHON%" -m pip check
+if errorlevel 1 goto install_failed
+"%VENV_PYTHON%" -c "import hashlib, pathlib; paths = [pathlib.Path(r'%PROJECT_ROOT%\backend\requirements.lock.txt'), pathlib.Path(r'%PROJECT_ROOT%\backend\requirements-dev.lock.txt')]; pathlib.Path(r'%PROJECT_ROOT%\.venv\.coolcity-dependencies.sha256').write_text(':'.join(hashlib.sha256(path.read_bytes()).hexdigest() for path in paths), encoding='ascii')"
+if errorlevel 1 goto install_failed
 
 echo Installing locked frontend dependencies...
 pushd "%PROJECT_ROOT%\frontend"
 call "%NPM_CMD%" ci
-set "NPM_EXIT=%ERRORLEVEL%"
+if errorlevel 1 goto frontend_install_failed
+call "%NPM_CMD%" ls --depth=0 >nul
+if not errorlevel 1 goto frontend_packages_ready
+
+echo Frontend verification was incomplete. Retrying the clean locked install once...
+call "%NPM_CMD%" ci
+if errorlevel 1 goto frontend_install_failed
+call "%NPM_CMD%" ls --depth=0 >nul
+if errorlevel 1 goto frontend_install_failed
+
+:frontend_packages_ready
+"%VENV_PYTHON%" -c "import hashlib, pathlib; paths = [pathlib.Path(r'%PROJECT_ROOT%\frontend\package.json'), pathlib.Path(r'%PROJECT_ROOT%\frontend\package-lock.json')]; pathlib.Path(r'%PROJECT_ROOT%\frontend\node_modules\.coolcity-dependencies.sha256').write_text(':'.join(hashlib.sha256(path.read_bytes()).hexdigest() for path in paths), encoding='ascii')"
+if errorlevel 1 goto frontend_install_failed
 popd
-if not "%NPM_EXIT%"=="0" goto install_failed
+goto frontend_install_complete
+
+:frontend_install_failed
+popd
+goto install_failed
+
+:frontend_install_complete
 
 if not exist "%PROJECT_ROOT%\.env" (
   copy /Y "%PROJECT_ROOT%\.env.example" "%PROJECT_ROOT%\.env" >nul
@@ -60,7 +82,11 @@ if not exist "%PROJECT_ROOT%\.env" (
 )
 
 echo.
-echo Setup complete. Double-click start_coolcity.cmd to run CoolCity AI.
+call "%PROJECT_ROOT%\check_coolcity_dependencies.cmd" >nul 2>&1
+if errorlevel 1 goto verification_failed
+
+echo Setup complete. All locked dependencies were verified.
+echo Double-click start_coolcity.cmd to run CoolCity AI.
 if /I "%NO_PAUSE%"=="true" exit /b 0
 pause
 exit /b 0
@@ -68,7 +94,7 @@ exit /b 0
 :create_venv
 where py.exe >nul 2>&1
 if not errorlevel 1 (
-  py.exe -3.12 -c "import sys; raise SystemExit(0 if sys.version_info ^>= (3, 12) else 1)" >nul 2>&1
+  py.exe -3.12 -c "import sys; raise SystemExit(0 if sys.version_info[:2] == (3, 12) else 1)" >nul 2>&1
   if not errorlevel 1 (
     py.exe -3.12 -m venv "%PROJECT_ROOT%\.venv"
     exit /b %ERRORLEVEL%
@@ -78,7 +104,7 @@ if not errorlevel 1 (
 set "PYTHON_EXE="
 for /f "delims=" %%I in ('where python.exe 2^>nul') do if not defined PYTHON_EXE set "PYTHON_EXE=%%I"
 if not defined PYTHON_EXE exit /b 1
-"%PYTHON_EXE%" -c "import sys; raise SystemExit(0 if sys.version_info ^>= (3, 12) else 1)" >nul 2>&1
+"%PYTHON_EXE%" -c "import sys; raise SystemExit(0 if sys.version_info[:2] == (3, 12) else 1)" >nul 2>&1
 if errorlevel 1 exit /b 1
 "%PYTHON_EXE%" -m venv "%PROJECT_ROOT%\.venv"
 exit /b %ERRORLEVEL%
@@ -109,6 +135,11 @@ goto fatal
 
 :install_failed
 echo ERROR: Dependency installation failed. Review the message above and retry.
+goto fatal
+
+:verification_failed
+echo ERROR: Dependency verification failed after installation.
+echo Review the messages above, then run setup_coolcity.cmd again.
 goto fatal
 
 :fatal
