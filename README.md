@@ -180,7 +180,7 @@ There is no mock or synthetic temperature mode in the product. A temperature ana
 
 The team's free test key is currently inactive and is not published. A reviewer or new user must paste their own active key for live provider calls; CoolCity does not silently substitute synthetic temperature data when authentication fails.
 
-- **Live demo:** _add the public no-login deployment URL before submission_
+- **Live demo:** [https://coolcity-ai-ashen.vercel.app](https://coolcity-ai-ashen.vercel.app) — public, HTTPS, and no login or installation required
 - **Demo video:** _add the public YouTube or Loom URL (maximum 3 minutes)_
 - **Screenshot:** add `docs/screenshots/dashboard.png`; see [`docs/screenshots/README.md`](docs/screenshots/README.md) for the privacy checklist.
 
@@ -218,7 +218,7 @@ CoolCity is a two-service application: FastAPI runs on Render and Next.js runs o
 2. Choose **New → Blueprint**, select `shayan19/coolcity-ai`, keep the Blueprint path as `render.yaml`, and continue.
 3. When Render asks for `COOLCITY_ALLOWED_ORIGINS`, temporarily enter `https://example.invalid`. This is replaced with the real Vercel origin in step 3 below.
 4. Apply the Blueprint and wait for `coolcity-ai-backend` to report **Live**.
-5. Copy the assigned HTTPS URL, for example `https://coolcity-ai-backend.onrender.com`, and open `<backend-url>/health`. A healthy deployment returns `{"status":"ok", ...}`.
+5. Copy the assigned HTTPS URL. The hackathon deployment uses `https://coolcity-ai-backend.onrender.com`; open [`/health`](https://coolcity-ai-backend.onrender.com/health) and confirm it returns `{"status":"ok", ...}`.
 
 The cost-safe Blueprint default is Render's `free` plan. Render documents that free web services spin down after 15 minutes without inbound traffic and can take about one minute to wake, so it is suitable for staging but not a reliable judging window. Before the submission deadline, change the backend to Render's smallest always-on web-service plan (`0.5c-512mb` at the time this README was prepared), after reviewing the current price in the dashboard. No database or persistent disk is required. The cache uses `/tmp/coolcity-cache`; losing cached provider results after a restart affects performance only, not correctness.
 
@@ -237,7 +237,7 @@ Vercel environment-variable changes apply only to new deployments. If the backen
 ### 3. Lock CORS to the production frontend
 
 1. In Render, open `coolcity-ai-backend` → **Environment**.
-2. Replace `COOLCITY_ALLOWED_ORIGINS` with the exact Vercel production origin, for example `https://coolcity-ai.vercel.app`. Include no path and no trailing slash. Multiple intentional production domains can be comma-separated.
+2. Replace `COOLCITY_ALLOWED_ORIGINS` with the exact Vercel production origin. The hackathon deployment uses `https://coolcity-ai-ashen.vercel.app`. Include no path and no trailing slash. Multiple intentional production domains can be comma-separated.
 3. Save and deploy the backend. CoolCity allows only `GET`/`POST` requests and the explicit `X-FortyGuard-API-Key` browser header; wildcard origins are rejected by the application configuration.
 
 ### 4. End-to-end release verification
@@ -246,7 +246,7 @@ Run these checks after both deployments finish:
 
 ```powershell
 $backendUrl = "https://coolcity-ai-backend.onrender.com"
-$frontendUrl = "https://coolcity-ai.vercel.app"
+$frontendUrl = "https://coolcity-ai-ashen.vercel.app"
 
 Invoke-RestMethod "$backendUrl/health"
 Invoke-WebRequest "$frontendUrl" -UseBasicParsing | Select-Object StatusCode
