@@ -5,6 +5,7 @@ import type { CoolingResponse } from "./cooling-response-model";
 import type { PolicyOptimization } from "./policy-optimizer";
 import type { TreeCatalog } from "./species-core";
 import { parseTemporalAnalysisResult, type FortyGuardTemporalAnalytic, type TemporalAnalysisResult } from "./temporal-contract";
+import { buildFortyGuardSubmitRequest, fortyGuardHeaders } from "./fortyguard-key";
 
 export type { TemperatureAnalysisResult };
 export type LiveAnalysisOptions = { date: string; time: string; granularity: 60 | 80 | 100; threshold_c: number };
@@ -29,6 +30,11 @@ export type PolicyResources = { catalog: TreeCatalog; cooling_evidence: unknown;
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://127.0.0.1:8000";
 
+class BackendRequestError extends Error {
+  readonly status: number;
+  constructor(message: string, status: number) { super(message); this.status = status; }
+}
+
 async function detail(response: Response, fallback: string): Promise<string> {
   try {
     const payload = await response.json() as { detail?: unknown };
@@ -43,22 +49,32 @@ async function postJson(url: string, body: unknown, signal?: AbortSignal): Promi
 }
 
 export async function submitFortyGuardAnalysis(
-  geometry: Polygon, options: LiveAnalysisOptions, analyticType: "tcm" | FortyGuardTemporalAnalytic = "tcm", signal?: AbortSignal,
+  geometry: Polygon, options: LiveAnalysisOptions, apiKey: string,
+  analyticType: "tcm" | FortyGuardTemporalAnalytic = "tcm", signal?: AbortSignal,
 ): Promise<Record<string, unknown>> {
-  return await postJson(`${BACKEND_URL}/api/temperature/submit`, { geometry, ...options, analytic_type: analyticType }, signal) as Record<string, unknown>;
+  const request = buildFortyGuardSubmitRequest(apiKey, { geometry, ...options, analytic_type: analyticType });
+  const response = await fetch(`${BACKEND_URL}/api/temperature/submit`, {
+    method: "POST",
+    headers: request.headers,
+    body: request.body,
+    signal,
+  });
+  if (!response.ok) throw new BackendRequestError(await detail(response, `Request failed with HTTP ${response.status}.`), response.status);
+  return await response.json() as Record<string, unknown>;
 }
 
-export async function getFortyGuardStatus(activityId: string, signal?: AbortSignal): Promise<Record<string, unknown>> {
-  const response = await fetch(`${BACKEND_URL}/api/temperature/status/${encodeURIComponent(activityId)}`, { headers: { Accept: "application/json" }, signal });
-  if (!response.ok) throw new Error(await detail(response, `FortyGuard status failed with HTTP ${response.status}.`));
+export async function getFortyGuardStatus(activityId: string, apiKey: string, signal?: AbortSignal): Promise<Record<string, unknown>> {
+  const response = await fetch(`${BACKEND_URL}/api/temperature/status/${encodeURIComponent(activityId)}`, { headers: fortyGuardHeaders(apiKey), signal });
+  if (!response.ok) throw new BackendRequestError(await detail(response, `FortyGuard status failed with HTTP ${response.status}.`), response.status);
   return response.json();
 }
 
 export async function pollFortyGuardAnalysis(
-  geometry: Polygon, options: LiveAnalysisOptions, onStatus?: (stage: "submitting" | "processing") => void, signal?: AbortSignal,
+  geometry: Polygon, options: LiveAnalysisOptions, apiKey: string,
+  onStatus?: (stage: "submitting" | "processing") => void, signal?: AbortSignal,
 ): Promise<TemperatureAnalysisResult> {
   onStatus?.("submitting");
-  const submission = await submitFortyGuardAnalysis(geometry, options, "tcm", signal);
+  const submission = await submitFortyGuardAnalysis(geometry, options, apiKey, "tcm", signal);
   if (submission.status === "Completed") return parseAnalysisResult(submission.result);
   const activityId = typeof submission.activity_id === "string" ? submission.activity_id : null;
   if (!activityId) throw new Error("FortyGuard did not return an activity ID.");
@@ -67,19 +83,23 @@ export async function pollFortyGuardAnalysis(
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
     await new Promise((resolve) => setTimeout(resolve, 2500));
     let status: Record<string, unknown>;
-    try { status = await getFortyGuardStatus(activityId, signal); }
-    catch (error) { if (signal?.aborted) throw error; continue; }
+    try { status = await getFortyGuardStatus(activityId, apiKey, signal); }
+    catch (error) {
+      if (signal?.aborted) throw error;
+      if (error instanceof BackendRequestError && (error.status === 404 || error.status >= 500)) continue;
+      throw error;
+    }
     if (status.status === "Completed") return parseAnalysisResult(status.result);
     if (status.status === "Failed") throw new Error(typeof status.error === "string" ? status.error : "FortyGuard analysis failed.");
   }
 }
 
 export async function pollFortyGuardTemporalAnalysis(
-  geometry: Polygon, options: LiveAnalysisOptions, analyticType: FortyGuardTemporalAnalytic,
+  geometry: Polygon, options: LiveAnalysisOptions, apiKey: string, analyticType: FortyGuardTemporalAnalytic,
   onStatus?: (stage: "submitting" | "processing") => void, signal?: AbortSignal,
 ): Promise<TemporalAnalysisResult> {
   onStatus?.("submitting");
-  const submission = await submitFortyGuardAnalysis(geometry, options, analyticType, signal);
+  const submission = await submitFortyGuardAnalysis(geometry, options, apiKey, analyticType, signal);
   if (submission.status === "Completed") return parseTemporalAnalysisResult(submission.result);
   const activityId = typeof submission.activity_id === "string" ? submission.activity_id : null;
   if (!activityId) throw new Error("FortyGuard did not return an activity ID.");
@@ -88,8 +108,12 @@ export async function pollFortyGuardTemporalAnalysis(
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
     await new Promise((resolve) => setTimeout(resolve, 2500));
     let status: Record<string, unknown>;
-    try { status = await getFortyGuardStatus(activityId, signal); }
-    catch (error) { if (signal?.aborted) throw error; continue; }
+    try { status = await getFortyGuardStatus(activityId, apiKey, signal); }
+    catch (error) {
+      if (signal?.aborted) throw error;
+      if (error instanceof BackendRequestError && (error.status === 404 || error.status >= 500)) continue;
+      throw error;
+    }
     if (status.status === "Completed") return parseTemporalAnalysisResult(status.result);
     if (status.status === "Failed") throw new Error(typeof status.error === "string" ? status.error : "FortyGuard analysis failed.");
   }

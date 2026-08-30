@@ -18,14 +18,14 @@ const planLabel = (plan: PolicyPlan) => plan.plan_type === "low_intervention" ? 
 
 export default function AnalysisSidebar(props: {
   areaM2: number | null; validationMessage: string | null; mapReady: boolean;
-  analytic: FortyGuardAnalytic; liveOptions: LiveAnalysisOptions; analysis: TemperatureAnalysisResult | null;
+  analytic: FortyGuardAnalytic; liveOptions: LiveAnalysisOptions; apiKey: string; analysis: TemperatureAnalysisResult | null;
   analysisBusy: boolean; analysisStage: "idle" | "submitting" | "processing"; analysisError: string | null;
   selectedCell: SelectedCell; landCover: LandCoverAnalysisResult | null; landBusy: boolean; landError: string | null;
   resources: PolicyResources | null; speciesId: string; targetTemperatureC: number; treeCountMax: number; coolRoofMaximumPct: number; coolPavementMaximumPct: number;
   optimization: PolicyOptimization | null; selectedPlanType: PolicyPlan["plan_type"]; policyBusy: boolean; policyError: string | null;
   incentiveAssessment: IncentiveAssessment | null; incentiveCreditConfiguration: IncentiveCreditConfiguration; verificationStatus: VerificationStatus;
   onDraw: () => void; onClear: () => void; onAnalyze: () => void;
-  onAnalytic: (analytic: FortyGuardAnalytic) => void; onLiveOptions: (options: LiveAnalysisOptions) => void;
+  onAnalytic: (analytic: FortyGuardAnalytic) => void; onLiveOptions: (options: LiveAnalysisOptions) => void; onApiKey: (apiKey: string) => void;
   onSelectCell: (cellId: string) => void; onAnalyzeLand: () => void; onSpecies: (id: string) => void; onTarget: (value: number) => void;
   onTreeMax: (value: number) => void; onRoofMax: (value: number) => void; onPavementMax: (value: number) => void; onOptimize: () => void; onPlan: (type: PolicyPlan["plan_type"]) => void;
   onIncentiveCreditConfiguration: (configuration: IncentiveCreditConfiguration) => void; onVerificationStatus: (status: VerificationStatus) => void; onOpenReport: () => void;
@@ -35,10 +35,11 @@ export default function AnalysisSidebar(props: {
   const selected = props.selectedCell?.properties;
   const selectedPlan = props.optimization?.plans.find((plan) => plan.plan_type === props.selectedPlanType) ?? null;
   const temporalNeedsBaseline = props.analytic !== "tcm" && !props.analysis;
+  const apiKeyMissing = !props.apiKey.trim();
   const analyzeLabel = props.analytic === "tcm" ? "Analyze FortyGuard Temperature" : props.analytic === "time_of_measure" ? "Analyze Peak Heat Time" : props.analytic === "exceedance" ? "Analyze Heat Exceedance" : "Analyze Heat Persistence";
   return <aside className="analysis-sidebar">
-    <SiteControls areaM2={props.areaM2} validationMessage={props.validationMessage} mapReady={props.mapReady} isAnalyzing={props.analysisBusy} progressStage={props.analysisStage} liveInputValid={Boolean(props.liveOptions.date && props.liveOptions.time && !temporalNeedsBaseline)} liveDisabledReason={temporalNeedsBaseline ? "Analyze FortyGuard Temperature first" : null} analyzeLabel={analyzeLabel} onDraw={props.onDraw} onClear={props.onClear} onAnalyze={props.onAnalyze} />
-    <DataSourceSelector analytic={props.analytic} liveOptions={props.liveOptions} disabled={props.analysisBusy} onAnalyticChange={props.onAnalytic} onLiveOptionsChange={props.onLiveOptions} />
+    <SiteControls areaM2={props.areaM2} validationMessage={props.validationMessage} mapReady={props.mapReady} isAnalyzing={props.analysisBusy} progressStage={props.analysisStage} liveInputValid={Boolean(props.liveOptions.date && props.liveOptions.time && !temporalNeedsBaseline && !apiKeyMissing)} liveDisabledReason={temporalNeedsBaseline ? "Analyze FortyGuard Temperature first" : apiKeyMissing ? "Enter your FortyGuard API key below" : null} analyzeLabel={analyzeLabel} onDraw={props.onDraw} onClear={props.onClear} onAnalyze={props.onAnalyze} />
+    <DataSourceSelector analytic={props.analytic} liveOptions={props.liveOptions} apiKey={props.apiKey} disabled={props.analysisBusy} onAnalyticChange={props.onAnalytic} onLiveOptionsChange={props.onLiveOptions} onApiKeyChange={props.onApiKey} />
     {props.analysisError ? <p className="analysis-error" role="alert">{props.analysisError}</p> : null}
 
     <section className="sidebar-section thermal-diagnosis"><div className="section-heading"><div><p className="section-kicker">3 · Selected hotspot</p><h2>FORTYGUARD THERMAL PROFILE</h2></div>{props.analysis ? <span className="source-badge">{props.analysis.cached ? "Cached provider result" : "Live provider result"}</span> : null}</div>

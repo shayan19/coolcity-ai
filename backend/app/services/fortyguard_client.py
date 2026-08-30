@@ -1,4 +1,5 @@
 from collections.abc import Mapping
+import hashlib
 from typing import Any
 
 import httpx
@@ -58,6 +59,12 @@ class FortyGuardClient:
         self.settings = settings
         self.transport = transport
         self.timeout = timeout
+
+    def credential_scope(self) -> str:
+        """Return a non-reversible cache namespace without persisting the key."""
+        if not self.settings.api_key:
+            return ""
+        return hashlib.sha256(self.settings.api_key.encode("utf-8")).hexdigest()
 
     def ensure_live_request_allowed(self) -> None:
         if not self.settings.api_key:

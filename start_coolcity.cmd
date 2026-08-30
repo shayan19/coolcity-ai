@@ -48,7 +48,7 @@ if not exist "%PROJECT_ROOT%\.env" (
   echo Created .env from the safe template.
 )
 findstr /R /C:"^FORTYGUARD_API_KEY=..*" "%PROJECT_ROOT%\.env" >nul 2>&1
-if errorlevel 1 echo NOTE: Add FORTYGUARD_API_KEY to .env before running a live analysis.
+if errorlevel 1 echo NOTE: Paste your own FortyGuard API key in the browser before live analysis. .env is an optional server fallback.
 
 call :backend_ready
 if not errorlevel 1 (
@@ -132,7 +132,7 @@ pause
 exit /b 0
 
 :backend_ready
-powershell.exe -NoProfile -Command "try { $r = Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:8000/health' -TimeoutSec 2; if ($r.StatusCode -eq 200 -and $r.Content -match 'CoolCity AI') { exit 0 } } catch {}; exit 1" >nul 2>&1
+powershell.exe -NoProfile -Command "try { $r = Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:8000/health' -TimeoutSec 2; if ($r.StatusCode -eq 200 -and $r.Content -match 'CoolCity AI' -and $r.Content -match 'frontend_api_key') { exit 0 } } catch {}; exit 1" >nul 2>&1
 exit /b %errorlevel%
 
 :frontend_ready

@@ -7,7 +7,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.app.config import FortyGuardSettings
-from backend.app.main import app
+from backend.app.main import app, get_fortyguard_service
 from backend.app.schemas import FortyGuardSubmitRequest
 from backend.app.services.fortyguard_client import (
     FortyGuardAPIError,
@@ -83,6 +83,28 @@ def test_missing_key_endpoint_returns_safe_message(monkeypatch) -> None:
     assert response.json() == {
         "detail": "FortyGuard API key is missing or invalid."
     }
+
+
+def test_browser_key_overrides_optional_server_fallback(monkeypatch) -> None:
+    monkeypatch.setenv("FORTYGUARD_API_KEY", "server-fallback-key")
+
+    service = get_fortyguard_service("  user-provided-key  ")
+
+    assert service.client.settings.api_key == "user-provided-key"
+
+
+def test_cors_preflight_allows_browser_api_key_header() -> None:
+    response = TestClient(app).options(
+        "/api/temperature/submit",
+        headers={
+            "Origin": "http://localhost:3000",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "x-fortyguard-api-key,content-type",
+        },
+    )
+
+    assert response.status_code == 200
+    assert "x-fortyguard-api-key" in response.headers["access-control-allow-headers"].lower()
 
 
 def test_valid_submission_extracts_activity_and_closes_polygon(tmp_path: Path) -> None:
@@ -361,8 +383,34 @@ def test_completed_cache_is_reused_without_resubmission(tmp_path: Path) -> None:
     assert completed["status"] == "Completed"
     assert second["status"] == "Completed"
     assert second["cached"] is True
-    assert second["request_id"] == create_request_id(request)
+    assert second["request_id"] == create_request_id(
+        request,
+        service.client.credential_scope(),
+    )
     assert calls == {"submit": 1, "status": 1}
+
+
+def test_cache_is_scoped_without_storing_raw_api_key(tmp_path: Path) -> None:
+    request = FortyGuardSubmitRequest.model_validate(VALID_SUBMIT_BODY)
+    keys = ("first-user-secret", "second-user-secret")
+    request_ids: list[str] = []
+
+    for index, api_key in enumerate(keys, 1):
+        transport = httpx.MockTransport(
+            lambda _: httpx.Response(
+                200,
+                json={"data": {"activity_id": f"activity-{index}"}},
+            )
+        )
+        service = FortyGuardTemperatureService(
+            FortyGuardClient(make_settings(api_key=api_key), transport=transport),
+            cache_directory=tmp_path,
+        )
+        request_ids.append(run(service.submit(request))["request_id"])
+
+    assert request_ids[0] != request_ids[1]
+    serialized_cache = "\n".join(path.read_text(encoding="utf-8") for path in tmp_path.glob("*.json"))
+    assert all(api_key not in serialized_cache for api_key in keys)
 
 
 def test_processing_request_is_resumed_without_duplicate_submission(

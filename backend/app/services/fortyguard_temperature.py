@@ -55,7 +55,10 @@ def build_fortyguard_payload(request: FortyGuardSubmitRequest) -> dict[str, Any]
     return payload
 
 
-def create_request_id(request: FortyGuardSubmitRequest) -> str:
+def create_request_id(
+    request: FortyGuardSubmitRequest,
+    credential_scope: str = "",
+) -> str:
     request_material = {
         "coordinates": request.geometry.model_dump(mode="json")["coordinates"],
         "date": request.date,
@@ -64,6 +67,8 @@ def create_request_id(request: FortyGuardSubmitRequest) -> str:
         "analytic_type": request.analytic_type,
         "threshold_c": request.threshold_c if request.analytic_type in {"exceedance", "persistence"} else None,
     }
+    if credential_scope:
+        request_material["credential_scope"] = credential_scope
     canonical = json.dumps(request_material, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
@@ -367,7 +372,11 @@ class FortyGuardTemperatureService:
         )
         temporary.replace(destination)
 
-    def _find_request_id(self, activity_id: str) -> str | None:
+    def _find_request_id(
+        self,
+        activity_id: str,
+        credential_scope: str,
+    ) -> str | None:
         if not self.cache_directory.is_dir():
             return None
 
@@ -377,7 +386,11 @@ class FortyGuardTemperatureService:
             except (OSError, ValueError):
                 continue
 
-            if isinstance(payload, dict) and payload.get("activity_id") == activity_id:
+            if (
+                isinstance(payload, dict)
+                and payload.get("activity_id") == activity_id
+                and payload.get("credential_scope") == credential_scope
+            ):
                 request_id = payload.get("request_id")
                 return request_id if isinstance(request_id, str) else None
 
@@ -385,7 +398,7 @@ class FortyGuardTemperatureService:
 
     async def submit(self, request: FortyGuardSubmitRequest) -> dict[str, Any]:
         self.client.ensure_live_request_allowed()
-        request_id = create_request_id(request)
+        request_id = create_request_id(request, self.client.credential_scope())
         cached_entry = self._read_cache(request_id)
 
         if cached_entry and cached_entry.get("status") == "Completed":
@@ -420,6 +433,7 @@ class FortyGuardTemperatureService:
             {
                 "request_id": request_id,
                 "activity_id": activity_id,
+                "credential_scope": self.client.credential_scope(),
                 "status": "Processing",
                 "request": {
                     "geometry": request.geometry.model_dump(mode="json"),
@@ -468,7 +482,10 @@ class FortyGuardTemperatureService:
                 "error": "FortyGuard analysis failed.",
             }
 
-        request_id = self._find_request_id(activity_id)
+        request_id = self._find_request_id(
+            activity_id,
+            self.client.credential_scope(),
+        )
         previous = self._read_cache(request_id) if request_id else None
         request_metadata = previous.get("request", {}) if isinstance(previous, dict) else {}
         analytic_type = request_metadata.get("analytic_type", "tcm") if isinstance(request_metadata, dict) else "tcm"

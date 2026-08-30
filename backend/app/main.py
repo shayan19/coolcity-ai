@@ -1,6 +1,7 @@
-from typing import Any
+from dataclasses import replace
+from typing import Annotated, Any
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.config import get_allowed_origins, get_fortyguard_settings
@@ -17,19 +18,30 @@ from backend.app.services.fortyguard_temperature import (
     FortyGuardTemperatureService,
 )
 
-app = FastAPI(title="CoolCity AI", version="0.1.0")
+app = FastAPI(title="CoolCity AI", version="0.2.0")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=get_allowed_origins(),
     allow_credentials=False,
     allow_methods=["GET", "POST"],
-    allow_headers=["Accept", "Content-Type"],
+    allow_headers=["Accept", "Content-Type", "X-FortyGuard-API-Key"],
 )
 
 
-def get_fortyguard_service() -> FortyGuardTemperatureService:
+def get_fortyguard_service(
+    user_api_key: Annotated[
+        str | None,
+        Header(alias="X-FortyGuard-API-Key"),
+    ] = None,
+) -> FortyGuardTemperatureService:
     settings = get_fortyguard_settings()
+    if user_api_key is not None:
+        normalized_key = user_api_key.strip()
+        if len(normalized_key) > 1024:
+            raise HTTPException(status_code=400, detail="FortyGuard API key is too long.")
+        if normalized_key:
+            settings = replace(settings, api_key=normalized_key)
     return FortyGuardTemperatureService(FortyGuardClient(settings))
 
 
@@ -50,10 +62,11 @@ def raise_safe_fortyguard_error(error: Exception) -> None:
 
 
 @app.get("/health")
-def health() -> dict[str, str]:
+def health() -> dict[str, str | bool]:
     return {
         "status": "ok",
         "project": "CoolCity AI",
+        "frontend_api_key": True,
     }
 
 

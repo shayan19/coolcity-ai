@@ -36,7 +36,9 @@ FortyGuard is the primary observed-temperature source. CoolCity supports:
 
 The FastAPI backend submits the selected polygon, polls one provider activity, reuses matching in-progress or completed work, and normalizes returned GeoJSON while preserving original provider properties. Cells receive deterministic IDs in north-to-south, west-to-east order. The current `temperature_c` always remains the observed FortyGuard value.
 
-The FortyGuard key is read only by the Python backend from the process environment or root `.env`. It is never returned by an endpoint, logged, copied into a `NEXT_PUBLIC_*` variable, embedded in the browser bundle, or included in a test fixture. Automated tests use local fakes and make zero provider calls.
+Each user pastes their own FortyGuard key into the password field in the CoolCity interface. React keeps it only in the current page's memory and sends it in the dedicated `X-FortyGuard-API-Key` request header when submitting or polling an analysis. It is never put in a request body or URL, saved to local/session storage, included in a planner report, copied into a `NEXT_PUBLIC_*` variable, embedded in the browser bundle, logged, returned by an endpoint, or included in a test fixture. The FastAPI backend forwards it to FortyGuard's required `api-key` header and discards it after request handling. Automated tests use local fakes and make zero provider calls.
+
+For operators and direct backend clients, `FORTYGUARD_API_KEY` in the process environment or root `.env` remains an optional server-managed fallback. A user-provided browser key takes precedence for that request. Public deployments must use HTTPS because the backend necessarily receives the user's key in transit to call FortyGuard.
 
 ### FortyGuard API-key status
 
@@ -46,16 +48,16 @@ To obtain and configure your own key:
 
 1. Review the official [FortyGuard API plans and trial access](https://www.fortyguard.com/api-pricing), then register or request the appropriate API access. FortyGuard states that a key is provided upon registration or through an organization's admin console.
 2. If a free, trial, or hackathon key was issued but does not activate, contact FortyGuard at [`support@fortyguard.com`](mailto:support@fortyguard.com). Do not post the key in a GitHub issue.
-3. Copy the safe template with `Copy-Item .env.example .env` from the repository root.
-4. Open the new local `.env` file and set `FORTYGUARD_API_KEY=your_own_active_key`. Leave `FORTYGUARD_BASE_URL=https://api.fortyguard.com` unchanged unless FortyGuard instructs you otherwise.
-5. Save `.env`, restart the CoolCity backend or rerun `start_coolcity.cmd`, draw a supported US area, and explicitly start a FortyGuard analysis.
+3. Start CoolCity, paste the active key into **Your FortyGuard API key** in the interface, draw a supported US area, and explicitly start an analysis. The field is intentionally cleared when the page reloads.
+4. Optional operator fallback: copy `.env.example` to `.env`, set `FORTYGUARD_API_KEY`, and restart the backend. Never commit `.env` or use a `NEXT_PUBLIC_*` variable for a key.
 
-FortyGuard's [authentication guide](https://docs-api.fortyguard.com/docs/authentication) documents the required `api-key` request header; CoolCity adds it on the backend. A `401` response normally means the key is missing or invalid, `403` means the key's plan does not allow the request, and `429` means the request or credit limit has been reached. See the official [API quickstart](https://docs-api.fortyguard.com/docs/quickstart) for the current provider workflow.
+FortyGuard's [authentication guide](https://docs-api.fortyguard.com/docs/authentication) documents the provider-side `api-key` request header; CoolCity adds it only in the backend-to-FortyGuard request. A `401` response normally means the key is missing or invalid, `403` means the key's plan does not allow the request, and `429` means the request or credit limit has been reached. See the official [API quickstart](https://docs-api.fortyguard.com/docs/quickstart) for the current provider workflow.
 
 ## Architecture
 
 ```text
 Browser (Next.js + MapLibre)
+  ├─ user key in transient request header ──> FastAPI backend
   ├─ explicit analysis action ───────────────> FastAPI backend
   │                                             └─ FortyGuard Temperature API
   ├─ land-cover request ─────────────────────> Next.js server route
@@ -66,7 +68,7 @@ Browser (Next.js + MapLibre)
                                                 └─ urban-tree carbon evidence
 ```
 
-- **Backend:** credential isolation, provider payloads, polling, caching, safe errors, normalization, and health check.
+- **Backend:** transient user-key handling, optional environment fallback, provider payloads, credential-scoped polling/cache, safe errors, normalization, and health check.
 - **Frontend server:** WorldCover retrieval and exact-AOI processing, evidence files, policy evaluation, and optimization.
 - **Browser:** map workflow, thermal diagnosis, scenario controls, incentive screening, and printable report.
 - **Pure model code:** deterministic thermal scoring, response model, bounded optional calibration, canopy/carbon calculations, optimization, and incentive scoring.
@@ -136,15 +138,15 @@ Prerequisites: **Python 3.12** and **Node.js 20.9+**. The exact tested versions 
 1. Download or clone this repository.
 2. Double-click `start_coolcity.cmd`.
 3. The launcher checks the Python version, required backend imports, `pip check`, both dependency-lock fingerprints, the Node.js version, and the installed npm graph. If anything is missing, broken, or outdated, it automatically calls `setup_coolcity.cmd`, creates `.venv` only if missing, installs pip `26.2.1` and the fully locked Python graph, runs `npm ci` from the npm lockfile, and verifies the installation before continuing.
-4. Add your own active FortyGuard key to `.env`, restart if necessary, and open [http://localhost:3000](http://localhost:3000). The team's inactive free test key is not bundled; follow the [API-key procedure](#fortyguard-api-key-status) above.
+4. At [http://localhost:3000](http://localhost:3000), paste your own active FortyGuard key into **Your FortyGuard API key**. The team's inactive free test key is not bundled; follow the [API-key procedure](#fortyguard-api-key-status) above.
 
-That is the complete one-click installation and start flow. The launcher reuses a healthy root `.venv`, never installs Python packages globally, repairs incomplete environments, verifies both HTTP services, and opens the browser. You can also double-click `setup_coolcity.cmd` separately to force a dependency refresh after pulling changes. `check_coolcity_dependencies.cmd` performs a read-only environment check and returns a failure code when automatic repair is required.
+That is the complete one-click installation and start flow. The launcher reuses a healthy root `.venv`, never installs Python packages globally, repairs incomplete environments, verifies both HTTP services, and opens the browser. The Windows scripts support repository paths containing spaces and apostrophes, including OneDrive folders such as `FortyGuard Hackathon '26`. You can also double-click `setup_coolcity.cmd` separately to force a dependency refresh after pulling changes. `check_coolcity_dependencies.cmd` performs a read-only environment check and returns a failure code when automatic repair is required.
 
 ### Manual install and run
 
 ```powershell
 Copy-Item .env.example .env
-# Edit .env and set FORTYGUARD_API_KEY. Never commit this file.
+# .env is safe as copied. FORTYGUARD_API_KEY is an optional server fallback.
 
 py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install "pip==26.2.1"
@@ -170,9 +172,9 @@ npm.cmd run dev -- --hostname 127.0.0.1
 
 ## Live and demo mode
 
-There is no mock or synthetic temperature mode in the product. A temperature analysis is available only after an explicit user action and requires a valid server-side FortyGuard key; it may consume provider quota. Completed provider and WorldCover results may be cached locally for efficient repeat use, but `data/cache/` is runtime data and is not committed.
+There is no mock or synthetic temperature mode in the product. A temperature analysis is available only after an explicit user action and requires the user's valid FortyGuard key in the interface (or an optional server-managed fallback); it may consume that key's provider quota. Provider cache entries are scoped by a one-way key fingerprint so one credential cannot resume another credential's activity. The raw key is never cached. Completed provider and WorldCover results may be cached locally for efficient repeat use, but `data/cache/` is runtime data and is not committed.
 
-The team's free test key is currently inactive and is not published. A reviewer or new user must configure their own active key for live provider calls; CoolCity does not silently substitute synthetic temperature data when authentication fails.
+The team's free test key is currently inactive and is not published. A reviewer or new user must paste their own active key for live provider calls; CoolCity does not silently substitute synthetic temperature data when authentication fails.
 
 - **Live demo:** _add the public no-login deployment URL before submission_
 - **Demo video:** _add the public YouTube or Loom URL (maximum 3 minutes)_
@@ -208,17 +210,18 @@ CoolCity is a two-service application. Deploy the Python backend and Next.js fro
 
 ```powershell
 Copy-Item .env.example .env
-# Set FORTYGUARD_API_KEY in .env, then:
+# FORTYGUARD_API_KEY may remain blank when users enter keys in the interface.
 docker compose up --build
 ```
 
 For a public deployment:
 
-1. Set `FORTYGUARD_API_KEY` and `FORTYGUARD_BASE_URL` **only on the backend service**.
-2. Set backend `COOLCITY_ALLOWED_ORIGINS` to the exact public frontend origin.
-3. Build the frontend with `NEXT_PUBLIC_BACKEND_URL` set to the public backend URL. This URL is public configuration, not a secret.
-4. Give `data/cache/` persistent writable storage if cross-restart caching is desired.
-5. Expose backend health at `/health` and test the frontend in a private/incognito window with no login.
+1. Serve both frontend and backend over HTTPS; the backend receives the user-entered key only to make the provider call.
+2. Optionally set `FORTYGUARD_API_KEY` and `FORTYGUARD_BASE_URL` **only on the backend service** for a server-managed fallback.
+3. Set backend `COOLCITY_ALLOWED_ORIGINS` to the exact public frontend origin and allow the included `X-FortyGuard-API-Key` request header.
+4. Build the frontend with `NEXT_PUBLIC_BACKEND_URL` set to the public backend URL. This URL is public configuration, not a secret.
+5. Give `data/cache/` persistent writable storage if cross-restart caching is desired.
+6. Expose backend health at `/health` and test the frontend in a private/incognito window with no login.
 
 Never place `FORTYGUARD_API_KEY` in frontend environment settings, Docker build arguments, GitHub Actions logs, or any `NEXT_PUBLIC_*` variable.
 
@@ -229,7 +232,7 @@ CoolCity is a policy-screening tool, not engineering design, tax advice, a causa
 ## Hackathon compliance
 
 - FortyGuard is the primary observed thermal source and is called server-side.
-- The API key is ignored by Git, absent from the example file, and never exposed to the browser.
+- No API key is committed or bundled. A user-entered key exists only in that page's memory, transits to FastAPI in a header for explicit analysis requests, and is never saved in browser storage, request bodies, URLs, reports, logs, or caches.
 - Tests use controlled fixtures and consume zero FortyGuard credits.
 - Live analysis requires an explicit user action; there is no demo-temperature source.
 - Counterfactuals and uncertainty are labeled as CoolCity modeled estimates, not FortyGuard forecasts.

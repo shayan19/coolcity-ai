@@ -40,6 +40,13 @@ button { cursor: pointer; }
 .sidebar-section { padding: .8rem; margin-bottom: .65rem; border: 1px solid #d8e4df; border-radius: .75rem; background: #fff; }
 .fortyguard-section, .thermal-diagnosis { border-width: 2px; border-color: #4b8d79; background: linear-gradient(180deg,#f5fbf8,#fff); }
 .coverage-badge { max-width: 8rem; color: #236d56; font-size: .58rem; font-weight: 850; text-align: right; text-transform: uppercase; }
+.api-key-field { margin: .65rem 0; padding: .65rem; border: 1px solid #9fc2b5; border-radius: .55rem; background: #edf8f3; }
+.api-key-field > label { display: block; margin-bottom: .3rem; color: #235a49; font-size: .7rem; font-weight: 800; }
+.api-key-input-row { display: grid; grid-template-columns: 1fr auto; gap: .35rem; }
+.api-key-input-row input { width: 100%; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+.key-toggle { min-width: 3.8rem; padding: .45rem .6rem; border: 1px solid #7ea798; border-radius: .4rem; background: #fff; color: #24624e; font-size: .66rem; font-weight: 800; }
+.credential-note { margin: .4rem 0 0; color: #526e64; font-size: .62rem; line-height: 1.45; }
+.credential-note a { color: #156a50; font-weight: 800; }
 .analytic-tabs { display: grid; grid-template-columns: repeat(2,1fr); gap: .35rem; margin-bottom: .6rem; }
 .analytic-tabs button { padding: .48rem; border: 1px solid #a9c6bc; border-radius: .42rem; background: #fff; color: #315e50; font-size: .66rem; font-weight: 750; }
 .analytic-tabs button.active { border-color: #176e52; background: #176e52; color: #fff; }

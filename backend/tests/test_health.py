@@ -13,4 +13,5 @@ def test_health() -> None:
     assert response.json() == {
         "status": "ok",
         "project": "CoolCity AI",
+        "frontend_api_key": True,
     }

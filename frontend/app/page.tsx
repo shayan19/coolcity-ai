@@ -34,6 +34,7 @@ export default function Home() {
   const [site, setSite] = useState<SitePolygonFeature | null>(null);
   const [analytic, setAnalytic] = useState<FortyGuardAnalytic>("tcm");
   const [liveOptions, setLiveOptions] = useState<LiveAnalysisOptions>({ date: "2026-08-25", time: "14:00", granularity: 100, threshold_c: 40 });
+  const [fortyGuardApiKey, setFortyGuardApiKey] = useState("");
   const [analysis, setAnalysis] = useState<TemperatureAnalysisResult | null>(null);
   const [analysisStage, setAnalysisStage] = useState<"idle" | "submitting" | "processing">("idle");
   const [analysisError, setAnalysisError] = useState<string | null>(null);
@@ -89,18 +90,19 @@ export default function Home() {
 
   async function runTemperature() {
     if (!site || validationMessage) return;
+    if (!fortyGuardApiKey.trim()) { setAnalysisError("Enter your FortyGuard API key before running an analysis."); return; }
     if (analytic !== "tcm" && !analysis) { setAnalysisError("Analyze FortyGuard Temperature first"); return; }
     setAnalysisError(null); resetPolicy();
     setAnalysisStage("submitting");
     try {
       if (analytic === "tcm") {
         setLandCover(null); setSelectedCellId(null);
-        const result = await pollFortyGuardAnalysis(site.geometry, liveOptions, (stage) => setAnalysisStage(stage));
+        const result = await pollFortyGuardAnalysis(site.geometry, liveOptions, fortyGuardApiKey, (stage) => setAnalysisStage(stage));
         setAnalysis(result); setTemperatureVisible(true);
         const hottest = hottestCell(result.heatmap);
         if (hottest) { setSelectedCellId(hottest.properties.cell_id); setTimeout(() => mapRef.current?.focusCell(hottest.properties.cell_id), 50); }
       } else {
-        const temporalResult = await pollFortyGuardTemporalAnalysis(site.geometry, liveOptions, analytic, (stage) => setAnalysisStage(stage));
+        const temporalResult = await pollFortyGuardTemporalAnalysis(site.geometry, liveOptions, fortyGuardApiKey, analytic, (stage) => setAnalysisStage(stage));
         setAnalysis((current) => current ? { ...current, heatmap: mergeTemporalAnalysis(current.heatmap, temporalResult.heatmap, analytic) } : current);
       }
     } catch (error) { setAnalysisError(error instanceof Error ? error.message : "FortyGuard analysis failed."); }
@@ -141,7 +143,7 @@ export default function Home() {
     <div className="hero-explanation"><strong>FortyGuard diagnoses the urban heat problem.</strong> CoolCity AI determines what policy intervention is required to reduce it. <span>Current coverage: United States</span></div>
     <WorkflowProgress current={currentStage} />
     <div className="dashboard-grid"><section className="map-panel"><Map3D ref={mapRef} heatmap={analysis?.heatmap ?? null} landCover={landCover?.landcover ?? null} temperatureVisible={temperatureVisible} landCoverVisible={landCoverVisible} selectedCellId={selectedCellId} onCellSelect={handleCellSelect} onAreaChange={handleAreaChange} onReadyChange={setMapReady} /><LayerControls temperature={temperatureVisible} landCover={landCoverVisible} onTemperature={setTemperatureVisible} onLandCover={setLandCoverVisible} /></section>
-      <AnalysisSidebar areaM2={areaM2} validationMessage={validationMessage} mapReady={mapReady} analytic={analytic} liveOptions={liveOptions} analysis={analysis} analysisBusy={analysisStage !== "idle"} analysisStage={analysisStage} analysisError={analysisError} selectedCell={selectedCell} landCover={landCover} landBusy={landBusy} landError={landError} resources={resources} speciesId={speciesId} targetTemperatureC={targetTemperatureC} treeCountMax={treeCountMax} coolRoofMaximumPct={coolRoofMaximumPct} coolPavementMaximumPct={coolPavementMaximumPct} optimization={optimization} selectedPlanType={selectedPlanType} policyBusy={policyBusy} policyError={policyError} incentiveAssessment={incentiveAssessment} incentiveCreditConfiguration={incentiveCreditConfiguration} verificationStatus={verificationStatus} onDraw={() => mapRef.current?.startDrawing()} onClear={() => mapRef.current?.clearArea()} onAnalyze={runTemperature} onAnalytic={setAnalytic} onLiveOptions={setLiveOptions} onSelectCell={handleCellSelect} onAnalyzeLand={runLandCover} onSpecies={(id) => { setSpeciesId(id); resetPolicy(); }} onTarget={(value) => { setTargetTemperatureC(value); resetPolicy(); }} onTreeMax={(value) => { setTreeCountMax(value); resetPolicy(); }} onRoofMax={(value) => { setCoolRoofMaximumPct(value); resetPolicy(); }} onPavementMax={(value) => { setCoolPavementMaximumPct(value); resetPolicy(); }} onOptimize={optimizePolicy} onPlan={(type) => { setSelectedPlanType(type); setVerificationStatus("Proposed"); }} onIncentiveCreditConfiguration={setIncentiveCreditConfiguration} onVerificationStatus={setVerificationStatus} onOpenReport={openReport} />
+      <AnalysisSidebar areaM2={areaM2} validationMessage={validationMessage} mapReady={mapReady} analytic={analytic} liveOptions={liveOptions} apiKey={fortyGuardApiKey} analysis={analysis} analysisBusy={analysisStage !== "idle"} analysisStage={analysisStage} analysisError={analysisError} selectedCell={selectedCell} landCover={landCover} landBusy={landBusy} landError={landError} resources={resources} speciesId={speciesId} targetTemperatureC={targetTemperatureC} treeCountMax={treeCountMax} coolRoofMaximumPct={coolRoofMaximumPct} coolPavementMaximumPct={coolPavementMaximumPct} optimization={optimization} selectedPlanType={selectedPlanType} policyBusy={policyBusy} policyError={policyError} incentiveAssessment={incentiveAssessment} incentiveCreditConfiguration={incentiveCreditConfiguration} verificationStatus={verificationStatus} onDraw={() => mapRef.current?.startDrawing()} onClear={() => mapRef.current?.clearArea()} onAnalyze={runTemperature} onAnalytic={setAnalytic} onLiveOptions={setLiveOptions} onApiKey={setFortyGuardApiKey} onSelectCell={handleCellSelect} onAnalyzeLand={runLandCover} onSpecies={(id) => { setSpeciesId(id); resetPolicy(); }} onTarget={(value) => { setTargetTemperatureC(value); resetPolicy(); }} onTreeMax={(value) => { setTreeCountMax(value); resetPolicy(); }} onRoofMax={(value) => { setCoolRoofMaximumPct(value); resetPolicy(); }} onPavementMax={(value) => { setCoolPavementMaximumPct(value); resetPolicy(); }} onOptimize={optimizePolicy} onPlan={(type) => { setSelectedPlanType(type); setVerificationStatus("Proposed"); }} onIncentiveCreditConfiguration={setIncentiveCreditConfiguration} onVerificationStatus={setVerificationStatus} onOpenReport={openReport} />
     </div>
   </main>;
 }

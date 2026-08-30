@@ -18,7 +18,7 @@ if errorlevel 1 exit /b 1
 "%VENV_PYTHON%" -m pip check >nul 2>&1
 if errorlevel 1 exit /b 1
 
-"%VENV_PYTHON%" -c "import hashlib, pathlib; paths = [pathlib.Path(r'%PROJECT_ROOT%\backend\requirements.lock.txt'), pathlib.Path(r'%PROJECT_ROOT%\backend\requirements-dev.lock.txt')]; expected = ':'.join(hashlib.sha256(path.read_bytes()).hexdigest() for path in paths); actual = pathlib.Path(r'%PYTHON_STAMP%').read_text(encoding='ascii').strip(); raise SystemExit(0 if actual == expected else 1)" >nul 2>&1
+"%VENV_PYTHON%" -c "import hashlib, pathlib, sys; paths = [pathlib.Path(value) for value in sys.argv[1:3]]; expected = ':'.join(hashlib.sha256(path.read_bytes()).hexdigest() for path in paths); actual = pathlib.Path(sys.argv[3]).read_text(encoding='ascii').strip(); raise SystemExit(0 if actual == expected else 1)" "%PROJECT_ROOT%\backend\requirements.lock.txt" "%PROJECT_ROOT%\backend\requirements-dev.lock.txt" "%PYTHON_STAMP%" >nul 2>&1
 if errorlevel 1 exit /b 1
 
 set "NODE_EXE="
@@ -36,7 +36,7 @@ if not exist "%FRONTEND_DIR%\package.json" exit /b 1
 if not exist "%FRONTEND_DIR%\package-lock.json" exit /b 1
 if not exist "%FRONTEND_STAMP%" exit /b 1
 
-"%VENV_PYTHON%" -c "import hashlib, pathlib; paths = [pathlib.Path(r'%FRONTEND_DIR%\package.json'), pathlib.Path(r'%FRONTEND_DIR%\package-lock.json')]; expected = ':'.join(hashlib.sha256(path.read_bytes()).hexdigest() for path in paths); actual = pathlib.Path(r'%FRONTEND_STAMP%').read_text(encoding='ascii').strip(); raise SystemExit(0 if actual == expected else 1)" >nul 2>&1
+"%VENV_PYTHON%" -c "import hashlib, pathlib, sys; paths = [pathlib.Path(value) for value in sys.argv[1:3]]; expected = ':'.join(hashlib.sha256(path.read_bytes()).hexdigest() for path in paths); actual = pathlib.Path(sys.argv[3]).read_text(encoding='ascii').strip(); raise SystemExit(0 if actual == expected else 1)" "%FRONTEND_DIR%\package.json" "%FRONTEND_DIR%\package-lock.json" "%FRONTEND_STAMP%" >nul 2>&1
 if errorlevel 1 exit /b 1
 
 pushd "%FRONTEND_DIR%"

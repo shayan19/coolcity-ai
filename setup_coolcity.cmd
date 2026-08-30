@@ -46,7 +46,7 @@ echo Installing fully locked backend dependencies...
 if errorlevel 1 goto install_failed
 "%VENV_PYTHON%" -m pip check
 if errorlevel 1 goto install_failed
-"%VENV_PYTHON%" -c "import hashlib, pathlib; paths = [pathlib.Path(r'%PROJECT_ROOT%\backend\requirements.lock.txt'), pathlib.Path(r'%PROJECT_ROOT%\backend\requirements-dev.lock.txt')]; pathlib.Path(r'%PROJECT_ROOT%\.venv\.coolcity-dependencies.sha256').write_text(':'.join(hashlib.sha256(path.read_bytes()).hexdigest() for path in paths), encoding='ascii')"
+"%VENV_PYTHON%" -c "import hashlib, pathlib, sys; paths = [pathlib.Path(value) for value in sys.argv[1:3]]; pathlib.Path(sys.argv[3]).write_text(':'.join(hashlib.sha256(path.read_bytes()).hexdigest() for path in paths), encoding='ascii')" "%PROJECT_ROOT%\backend\requirements.lock.txt" "%PROJECT_ROOT%\backend\requirements-dev.lock.txt" "%PROJECT_ROOT%\.venv\.coolcity-dependencies.sha256"
 if errorlevel 1 goto install_failed
 
 echo Installing locked frontend dependencies...
@@ -63,7 +63,7 @@ call "%NPM_CMD%" ls --depth=0 >nul
 if errorlevel 1 goto frontend_install_failed
 
 :frontend_packages_ready
-"%VENV_PYTHON%" -c "import hashlib, pathlib; paths = [pathlib.Path(r'%PROJECT_ROOT%\frontend\package.json'), pathlib.Path(r'%PROJECT_ROOT%\frontend\package-lock.json')]; pathlib.Path(r'%PROJECT_ROOT%\frontend\node_modules\.coolcity-dependencies.sha256').write_text(':'.join(hashlib.sha256(path.read_bytes()).hexdigest() for path in paths), encoding='ascii')"
+"%VENV_PYTHON%" -c "import hashlib, pathlib, sys; paths = [pathlib.Path(value) for value in sys.argv[1:3]]; pathlib.Path(sys.argv[3]).write_text(':'.join(hashlib.sha256(path.read_bytes()).hexdigest() for path in paths), encoding='ascii')" "%PROJECT_ROOT%\frontend\package.json" "%PROJECT_ROOT%\frontend\package-lock.json" "%PROJECT_ROOT%\frontend\node_modules\.coolcity-dependencies.sha256"
 if errorlevel 1 goto frontend_install_failed
 popd
 goto frontend_install_complete
